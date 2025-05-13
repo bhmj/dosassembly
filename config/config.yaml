@@ -1,0 +1,13 @@
+dbase:
+  type: postgres
+  conn_string: host={{DB_HOST}} port={{DB_PORT}} dbname={{DB_NAME}} user={{DB_USER}} password={{DB_PASSWORD}} sslmode=disable
+service:
+  name: dosassembly
+  prometheus:
+    server:
+      port: 8081
+    metrics:
+      namespace: dosassembly
+  http:
+    api_base: api
+    port: 8080

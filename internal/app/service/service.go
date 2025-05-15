@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/bhmj/goblocks/httpreply"
 	"github.com/bhmj/goblocks/httpserver"
 	"github.com/bhmj/goblocks/log"
 	"github.com/bhmj/goblocks/metrics"
@@ -19,11 +20,13 @@ const (
 )
 
 type Config struct {
-	Name          string            `yaml:"name" description:"Service name for metrics" default:"dosassembly"`
-	ShutdownDelay time.Duration     `yaml:"shutdown_delay" description:"Grace period from readiness off to server down" default:"2s"`
-	Prometheus    prometheus.Config `yaml:"prometheus" description:"Prometheus config for the service"`
-	HTTP          httpserver.Config `yaml:"http" description:"HTTP endpoint configuration"`
-	Sentry        sentry.Config     `yaml:"sentry" description:"Sentry configuration"`
+	Name               string            `yaml:"name" description:"Service name for metrics" default:"dosassembly"`
+	ShutdownDelay      time.Duration     `yaml:"shutdown_delay" description:"Grace period from readiness off to server down" default:"2s"`
+	Prometheus         prometheus.Config `yaml:"prometheus" description:"Prometheus config for the service"`
+	HTTP               httpserver.Config `yaml:"http" description:"HTTP endpoint configuration"`
+	Sentry             sentry.Config     `yaml:"sentry" description:"Sentry configuration"`
+	PlaygroundServer   string            `yaml:"playground_server" description:"Playground server host"`
+	PlaygroundAPIToken string            `yaml:"playground_api_token" description:"Playground API token"`
 }
 
 type Service struct {
@@ -33,6 +36,7 @@ type Service struct {
 	prometheusServer *metrics.PrometheusServer
 	apiServer        *apiServer
 	sentryService    *sentry.Service
+	replier          httpreply.Replier
 }
 
 // HandlerDefinition contains method definition to use by HTTP server
@@ -61,6 +65,7 @@ func New(
 		cfg:           cfg,
 		apiMetrics:    apiMetrics,
 		sentryService: sentryService,
+		replier:       httpreply.NewReplier(logger),
 	}
 
 	apiServer, err := newAPIServer(cfg.HTTP, logger, metricsRegistry.Get(), sentryService)

@@ -31,9 +31,10 @@ func (s *Service) GetHandlers() (handlers []HandlerDefinition) {
 	}
 	raw := []rawHandlerDefinition{
 		{Method: "GET", Path: "/", Func: s.Index},
-		{Method: "GET", Path: "/about", Func: s.About},
-		{Method: "POST", Path: web("/refresh"), Func: s.WebRefresh},
-		{Method: "POST", Path: api("/run"), Func: s.RunProgram},
+		{Method: "GET", Path: "/about/", Func: s.About},
+		{Method: "POST", Path: web("/refresh/"), Func: s.WebRefresh},
+		{Method: "POST", Path: api("/compile/"), Func: s.Compile},
+		{Method: "OPTIONS", Path: api("/compile/"), Func: s.CompileCORS},
 	}
 	for i := range raw {
 		handler := HandlerDefinition{

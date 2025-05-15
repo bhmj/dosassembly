@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="icon" href="/i/dosasm-favicon.ico" type="image/x-icon"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="/js/ace/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+  <title>DOS Assembly</title>
+  <!-- js-dos style sheet -->
+  <!--link rel="stylesheet" href="https://v8.js-dos.com/latest/js-dos.css"-->
+  <!-- js-dos -->
+  <script src="https://v8.js-dos.com/latest/js-dos.js"></script>
+  <style>
+    :root {
+      --bg-color: #f9f9f9;
+      --text-color: #333;
+      --header-bg: #ffffff;
+      --status-bg: #eeeeee;
+      --tab-bg: #e0e0e0;
+      --active-tab-bg: #ccc;
+      /*JS-DOS consts */
+      --sidebar-width: 3rem;
+      --b3: 180 2% 90%;
+      --b2: 0 0% 95%;
+      --b1: 0 0% 100%;
+      --bc: 215 28% 17%;
+      --rounded-badge: 1.9rem;
+      --animation-input: 0.2s;
+      --handleoffset: 1.5rem;
+    }
+
+    [data-theme="dark"] {
+      --bg-color: #1e1e1e;
+      --text-color: #f0f0f0;
+      --header-bg: #2c2c2c;
+      --status-bg: #2a2a2a;
+      --tab-bg: #444;
+      --active-tab-bg: #666;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    header {
+      background-color: var(--header-bg);
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-left img {
+      height: 30px;
+    }
+
+    .theme-switch {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .switch {
+      position: relative;
+      width: 50px;
+      height: 26px;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .theme-switch .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0;
+      right: 0; bottom: 0;
+      background-color: #ccc;
+      border-radius: 34px;
+      transition: .4s;
+    }
+
+    .theme-switch .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      border-radius: 50%;
+      transition: .4s;
+    }
+
+    .theme-switch input:checked + .slider {
+      background-color: #2196F3;
+    }
+
+    .theme-switch input:checked + .slider:before {
+      transform: translateX(24px);
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .left-pane, .right-pane {
+      height: 100%;
+      /* padding: 10px; */
+      overflow: auto;
+    }
+
+    .left-pane {
+      flex-shrink: 0; /* prevent it from shrinking */
+      width: 664px;
+      min-width: 200px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      padding: 10px;
+    }
+
+    .code-editor {
+      flex: 1;
+      border: 1px solid #ccc;
+      background: #fff;
+      padding: 10px;
+      overflow: auto;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+
+    .code-editor:focus {
+      outline: none;
+    }
+
+    .right-pane {
+      flex: 1;
+      min-width: 200px;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+    }
+
+    .resizer {
+      width: 5px;
+      background: #ccc;
+      cursor: ew-resize;
+      position: relative;
+    }
+
+    .resizer:hover {
+      background: #44F;
+      cursor: ew-resize;
+      position: relative;
+    }
+
+    .control-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    select, button {
+      padding: 5px 10px;
+      font-size: 1em;
+    }
+
+    .tabs {
+      display: flex;
+      background: var(--tab-bg);
+      border-bottom: 1px solid #aaa;
+      margin: 0;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: var(--active-tab-bg);
+      font-weight: bold;
+    }
+
+    .tab-content {
+      flex: 1;
+      /* padding: 10px; */
+      border: 1px solid #ccc;
+      border-top: none;
+      background: #f0f0f0;
+      font-family: monospace;
+      white-space: pre-wrap;
+      overflow: auto;
+    }
+
+    .compiler-output {
+      padding: 1em;
+    }
+
+    footer {
+      background-color: var(--status-bg);
+      padding: 8px 20px;
+      border-top: 1px solid #ccc;
+      font-size: 0.9em;
+      text-align: left;
+    }
+
+    .container {
+      display: flex;
+      width: 100%;
+      height: 100%;
+    }
+
+    .sun-icon {
+      font-size: 1.2em;
+    }
+
+    #dosbox-container {
+      width: 100%;
+      height: 100%;
+    }
+
+    /* JS-DOS styles */
+
+    .jsdos-rso .overflow-hidden {
+      overflow: hidden;
+    }
+
+    .jsdos-rso .overflow-auto {
+      overflow: auto;
+    }
+
+    .jsdos-rso .relative {
+      position: relative;
+    }  
+
+    .jsdos-rso .w-full {
+      width: 100%;
+    }
+
+    .jsdos-rso .h-full {
+      height: 100%;
+    }
+
+    .jsdos-rso .self-end {
+      align-self: flex-end;
+    }
+
+    .jsdos-rso .w-2 {
+      width: .5rem;
+    }
+
+    .jsdos-rso .w-12 {
+      width: 3rem;
+    }
+
+    .jsdos-rso .h-1 {
+      height: .25rem;
+    }
+
+    .jsdos-rso .h-2 {
+      height: .5rem;
+    }
+
+    .jsdos-rso .h-16 {
+      height: 4rem;
+    }
+
+    .jsdos-rso .-mt-3 {
+      margin-top: -.75rem;
+    }
+
+    .jsdos-rso .mt-4 {
+      margin-top: 1rem;
+    }
+
+    .jsdos-rso .mr-6 {
+      margin-right: 1.5rem;
+    }
+
+    .jsdos-rso .my-4 {
+      margin-top: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .jsdos-rso .mx-2 {
+      margin-left: .5rem;
+      margin-right: .5rem;
+    }
+
+    .jsdos-rso .gap-2 {
+      gap: .5rem;
+    }
+
+    .jsdos-rso .items-start {
+      align-items: flex-start;
+    }
+
+    .jsdos-rso .items-center {
+      align-items: center;
+    }
+
+    .jsdos-rso .items-end {
+      align-items: flex-end;
+    }
+
+    .jsdos-rso .flex {
+      display: flex;
+    }
+
+    .jsdos-rso .flex-row {
+      flex-direction: row;
+    }
+
+    .jsdos-rso .flex-col {
+      flex-direction: column;
+    }
+
+    .jsdos-rso .flex-grow {
+      flex-grow: 1;
+    }
+
+    .jsdos-rso .flex-wrap {
+      flex-wrap: wrap;
+    }
+
+    .jsdos-rso .justify-evenly {
+      justify-content: space-evenly;
+    }
+
+    .jsdos-rso .bg-black {
+      background-color: rgb(0 0 0);
+    }
+
+    .jsdos-rso .bg-base-200 {
+      --tw-bg-opacity: 1;
+      background-color: hsl(var(--b2) / var(--tw-bg-opacity));
+    }
+
+    .jsdos-rso .rounded-full {
+      border-radius: 9999px;
+    }
+
+    .jsdos-rso .slider .touch .point {
+      position: absolute;
+      height: 1.5rem;
+      width: 1.5rem;
+      border-radius: 9999px;
+      --tw-bg-opacity: 1;
+      background-color: hsl(var(--bc) / var(--tw-bg-opacity));
+      --tw-text-opacity: 1;
+      color: hsl(var(--b2) / var(--tw-text-opacity));
+    }
+
+    .jsdos-rso .slider .touch .bg-active {
+      position: absolute;
+      --tw-bg-opacity: 1;
+      background-color: hsl(var(--p) / var(--tw-bg-opacity));
+    }
+    .jsdos-rso .sidebar {
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      height: 100%;
+      flex-direction: column;
+      align-items: center;
+      padding-top: .5rem;
+      padding-bottom: .5rem;
+      background: linear-gradient(90deg, hsl(var(--b3)), hsl(var(--b2)));
+      width: var(--sidebar-width);
+      box-sizing: border-box;
+      white-space: unset;
+    }  
+
+    .jsdos-rso .sidebar-button {
+      position: relative;
+      margin-top: .5rem;
+      margin-bottom: .5rem;
+      height: 2rem;
+      width: 2rem;
+      cursor: pointer;
+      color: hsl(var(--bc));
+    }  
+
+    .jsdos-rso .sidebar .contentbar {
+      flex-grow: 1;
+    }  
+    .jsdos-rso .sidebar .cycles {
+      margin-top: .25rem;
+      margin-bottom: -.5rem;
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      padding-right: .5rem;
+      text-align: right;
+      font-size: .75rem;
+      line-height: 1rem;
+      opacity: .5;
+      color: hsl(var(--bc));
+    }  
+
+    .jsdos-rso .bg-green-300 {
+      --tw-bg-opacity: 1;
+      background-color: rgb(134 239 172 / var(--tw-bg-opacity));
+    }  
+
+    .jsdos-rso .bg-base-300 {
+      --tw-bg-opacity: 1;
+      background-color: hsl(var(--b3) / var(--tw-bg-opacity));
+    }  
+
+    .jsdos-rso .animate-led {
+      animation: pulse .3s cubic-bezier(.4,0,.6,1) infinite;
+    }    
+
+    .jsdos-rso .sidebar-highlight, .jsdos-rso .sidebar-button:hover {
+      color: hsl(174 75% 39%);
+    }
+
+    .jsdos-rso .frame {
+      position: absolute;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 24rem;
+      overflow: auto;
+      padding-top: 1rem;
+      padding-bottom: 1rem;
+      padding-left: 3rem;
+      background-color: hsl(var(--b3));
+    }
+
+    .jsdos-rso .settings-frame, .jsdos-rso .prerun-frame {
+      margin-top: -.5rem;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+
+    .jsdos-rso .frame-root {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .jsdos-rso .form-control {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .jsdos-rso .settings-frame .option, .jsdos-rso .prerun-frame .option {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .jsdos-rso .settings-frame .label, .jsdos-rso .prerun-frame .label {
+      padding: 0;
+    }
+
+    .jsdos-rso .label {
+      display: flex;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+      align-items: center;
+      justify-content: space-between;
+      padding: .5rem .25rem;
+    }
+
+    .jsdos-rso .label-text {
+      font-size: .875rem;
+      line-height: 1.25rem;
+      --tw-text-opacity: 1;
+      color: hsl(var(--bc) / var(--tw-text-opacity));
+    }
+
+    .jsdos-rso .toggle {
+      flex-shrink: 0;
+      --tglbg: hsl(var(--b1));
+      --handleoffsetcalculator: calc(var(--handleoffset) * -1);
+      --togglehandleborder: 0 0;
+      height: 1.5rem;
+      width: 3rem;
+      cursor: pointer;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      border-width: 1px;
+      border-color: hsl(var(--bc) / var(--tw-border-opacity));
+      --tw-border-opacity: .2;
+      background-color: hsl(var(--bc) / var(--tw-bg-opacity));
+      --tw-bg-opacity: .5;
+      border-radius: var(--rounded-badge, 1.9rem);
+      transition: background,box-shadow var(--animation-input, .2s) ease-out;
+      box-shadow: var(--handleoffsetcalculator) 0 0 2px var(--tglbg) inset,0 0 0 2px var(--tglbg) inset,var(--togglehandleborder);
+    }
+
+    .jsdos-rso .toggle-primary:checked, .jsdos-rso .toggle-primary[checked=true], .jsdos-rso .toggle-primary[aria-checked=true] {
+      border-color: hsl(var(--p) / var(--tw-border-opacity));
+      --tw-border-opacity: .1;
+      --tw-bg-opacity: 1;
+      background-color: hsl(var(--p) / var(--tw-bg-opacity));
+      --tw-text-opacity: 1;
+      color: hsl(var(--pc) / var(--tw-text-opacity));
+    }
+
+    .jsdos-rso .toggle:checked, .jsdos-rso .toggle[checked=true], .jsdos-rso .toggle[aria-checked=true] {
+      --handleoffsetcalculator: var(--handleoffset);
+      --tw-border-opacity: 1;
+      --tw-bg-opacity: 1;
+    }
+
+    .jsdos-rso button, .jsdos-rso input, .jsdos-rso optgroup, .jsdos-rso select, .jsdos-rso textarea {
+      font-family: inherit;
+      font-feature-settings: inherit;
+      font-variation-settings: inherit;
+      font-size: 100%;
+      font-weight: inherit;
+      line-height: inherit;
+      color: inherit;
+      margin: 0;
+      padding: 0;
+    }
+
+    .jsdos-rso .slider .touch {
+      position: relative;
+      display: flex;
+      cursor: pointer;
+    }
+
+    .jsdos-rso canvas, .jsdos-rso .slider, .jsdos-rso .soft-keyboard {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      user-select: none;
+      -ms-touch-action: none;
+      -ms-content-zooming: none;
+      touch-action: none;
+      outline: none;
+    }
+
+    .jsdos-rso .kbd-md {
+      padding-left: .5rem;
+      padding-right: .5rem;
+      font-size: 1rem;
+      line-height: 1.5rem;
+      min-height: 2.2em;
+      min-width: 2.2em;
+    }
+
+    .jsdos-rso .kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-width: 1px;
+      border-color: hsl(var(--bc) / var(--tw-border-opacity));
+      --tw-border-opacity: .2;
+      --tw-bg-opacity: 1;
+      background-color: hsl(var(--b2) / var(--tw-bg-opacity));
+      padding-left: .5rem;
+      padding-right: .5rem;
+      border-radius: var(--rounded-btn, .5rem);
+      border-bottom-width: 2px;
+      min-height: 2.2em;
+      min-width: 2.2em;
+    }
+
+    .jsdos-rso code, .jsdos-rso kbd, .jsdos-rso samp, .jsdos-rso pre {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, Liberation Mono, Courier New, monospace;
+      font-feature-settings: normal;
+      font-variation-settings: normal;
+      font-size: 1em;
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <header>
+    <div class="header-left">
+      <img src="/i/dosasm-logo.png" alt="Logo">
+      <h1 style="font-size: 1.2em; margin: 0;">DOS Assembly</h1>
+    </div>
+    <div class="theme-switch">
+      <span class="sun-icon">☀️</span>
+      <label class="switch">
+        <input type="checkbox" onchange="toggleTheme()" checked/>
+        <span class="slider"></span>
+      </label>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="left-pane" id="left-pane">
+        <div class="control-bar">
+          <select id="asm-lang">
+            <option>TASM</option>
+            <option>MASM</option>
+            <option>NASM</option>
+            <option>FASM</option>
+          </select>
+          <button onclick="runCom()">Run</button>
+        </div>
+        <div id="code-editor" class="code-editor" contenteditable="true">// Write your assembly code here...</div>
+      </div>
+      <div class="resizer" id="resizer" title="Double-click to center"></div>
+      <div class="right-pane" id="right-pane">
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab('output')">Output</div>
+          <div class="tab" onclick="switchTab('docs')">Documentation</div>
+          <div class="tab" onclick="switchTab('examples')">Examples</div>
+        </div>
+        <div class="tab-content" id="tab-output"><div id="dosbox-container" ></div><div id="compiler-output"></div></div>
+        <div class="tab-content" id="tab-docs" style="display: none;">Assembly language documentation...</div>
+        <div class="tab-content" id="tab-examples" style="display: none;">Example programs go here...</div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    Status: <span id="asm-status">ready</span>
+  </footer>
+
+  <script>
+    defaultSourceCode = `IDEAL
+P386
+MODEL TINY
+CODESEG
+        ORG     100H
+Start:
+
+BLOB_X  equ     48
+BLOB_Y  equ     48
+LONG    equ     31
+
+; video
+        mov     ax,0013h
+        int     10h
+; palette
+        mov     dx,3C8h
+        xor     ax,ax
+        out     dx,al
+        inc     dx
+        mov     cx,256
+@@pal:  mov     ax,256
+        sub     ax,cx
+        shr     ax,2
+        out     dx,al
+        xor     ax,ax
+        out     dx,al
+        out     dx,al
+        loop    @@pal
+; buffer
+        mov     ax,cs
+        add     ah,10h
+        mov     es,ax
+        mov     ch,0FAh
+        xor     ax,ax
+        xor     di,di
+        rep     stosw
+
+MainLoop:
+; blob
+        mov     di,[y]
+        shl     di,8
+        mov     ax,di
+        shr     ax,2
+        add     di,ax
+        add     di,[x]
+        mov     bx,BLOB_Y
+@@y:    mov     cx,BLOB_X
+@@x:    inc     [byte ptr es:di]
+        inc     di
+        loop    @@x
+        add     di,320-BLOB_X
+        dec     bx
+        jnz     @@y
+; swap to screen
+        push    es
+        pop     ds
+        push    0A000h
+        pop     es
+        xor     si,si
+        xor     di,di
+        mov     ch,7Dh
+        rep     movsw
+        push    ds
+        pop     es
+        push    cs
+        pop     ds
+; move
+        call    Random
+        test    al,LONG
+        jnz     @@m1
+        neg     [deltax]
+@@m1:   mov     ax,[deltax]
+        add     [x],ax
+        call    Random
+        test    al,LONG
+        jnz     @@m2
+        neg     [deltay]
+@@m2:   mov     ax,[deltay]
+        add     [y],ax
+; key
+        mov     ah,1
+        int     16h
+        jz      MainLoop
+; back to DOS
+        mov     ax,0003h
+        int     10h
+        int     16h
+        ret
+
+x       dw      100
+y       dw      100
+deltax  dw      1
+deltay  dw      1
+
+proc    Random
+        mov     eax,[Seed]
+        imul    [RandMul]
+        dec     eax
+        mov     [Seed],eax
+        shr     eax,16
+RandMul dd      015A4EC3h ; <-- ret
+Seed    dd      1
+endp    Random
+
+END     Start
+`
+
+    dosboxConf = `
+      [sdl]
+      output=overlay
+      [cpu]
+      core=auto
+      cputype=auto
+      cycles=100000
+      [render]
+      vsync=true
+      frameskip=0
+      [autoexec]
+      mount c .
+      c:
+      dummy.com
+    `;
+
+    var ciObject;
+    var ciReady = false;
+
+    let ed = document.getElementById("code-editor");
+    ed.addEventListener("keydown", (e) => { e.stopPropagation(); });
+    ed.addEventListener("keypress", (e) => { e.stopPropagation(); });
+    ed.addEventListener("keyup", (e) => { e.stopPropagation(); });
+
+    let editor = ace.edit("code-editor");
+    editor.setValue(defaultSourceCode);
+    editor.clearSelection()
+    editor.setKeyboardHandler("ace/keyboard/vscode");
+    editor.setTheme("ace/theme/dawn");
+    editor.session.setMode("ace/mode/assembly_x86");
+    editor.setShowPrintMargin(false);
+    //editor.getSession().on('change', onChange.bind(this, note, cEditor[id]));
+
+    function setStatus(str) {
+      let elem = document.getElementById("asm-status");
+      elem.innerText = str;
+    }
+
+    function toggleTheme() {
+      const body = document.body;
+      body.dataset.theme = body.dataset.theme === "dark" ? "light" : "dark";
+    }
+
+    function base64ToUint8Array(base64) {
+      const binaryString = atob(base64); // Decode base64 to binary string
+      const length = binaryString.length;
+      const bytes = new Uint8Array(length);
+      
+      for (let i = 0; i < length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+
+      return bytes;
+    }
+
+    async function runCom() {
+      const base64Com = "jMiAxBCOwLgAAM0zPQAAdAbHBrgCAQC4EwDNELgEALlAAbpkAM0zuAcAuWQAuhwCzTO6yAOwAe5Cuf8Ai8HB6ALu7u7i9rkAfTP/6EgBq+L6ugUAvgAAuQD66I0ASnX0Bg+hgz64AgB0DMcGugIAAMcGvAIAAGgAoAdg6JcAYYM+uAIBdBb/BroC/wa8Av8GwgKBPsICyABzSus+uAMAzTPR6YHpoACD6mSJDroCiRa8AvfDAgB0EA+gB7kAfTP/6NMAq+L66xL3wwEAdAy+AAC5APoPoAfoEAC0Ac0WdJYzwM0WuAMAzRDDHgYfM9uKXAGLw4pc/wPDipzA/gPDipxAAQPDwegCCsB0Av7IiARG4tofw8cGvgIAAL9BAb6d/71i/2QPtkUBZA+2Xf4rw4vd0fsrHroCK8NkD7aNQAFkD7aVgP0ryovW0forFrwCK8oPr8MPr8oDwZkzwivCwegEQArkdAKw/4sewAI5Hr4CfA7324HDxwA5Hr4CdwKqT0dFgf2fAH6b/wa+AkdHRoP+Y36Mw2ZSZi6htAJmLvcusAJmWmZIZi6jtAJmwegQw05aAQEAAAAAAJz/nf8AAAcAAABNSg==";
+      const dummyCom = base64ToUint8Array(base64Com);
+
+      sourceCode = editor.getValue();
+
+      try {
+        setStatus("sending query...");
+        let langs = document.getElementById("asm-lang");
+        let lang = langs.options[langs.selectedIndex].value.toLowerCase();
+        let params = {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ "files": { "dummy.asm": sourceCode }, "main":"dummy.asm", "lang":"dosasm", "version":"1.0-"+lang })
+        };
+        const response = await fetch("http://combobox.com:8080/api/compile/", params);
+        const result = await response.json();
+
+        setStatus("parsing response...");
+
+        if (result.base64) {
+          const dummyCom = base64ToUint8Array(result.base64);
+
+          document.getElementById("dosbox-container").style.display = "block";
+          document.getElementById("dosbox-container").tabIndex = 0;
+          document.getElementById("compiler-output").style.display = "none";
+
+          setStatus("running emulation");
+
+          ciObject = Dos(document.getElementById("dosbox-container"), {
+            dosboxConf: dosboxConf,
+            initFs: [
+              { path: "dummy.com", contents: dummyCom },
+            ],
+            onEvent: (event, ci) => {
+              if (event === "emu-ready") {
+                setStatus("emulator ready");
+              }
+              if (event === "bnd-play") {
+                setStatus("bundle ready");
+              }
+              if (event === "ci-ready") {
+                setStatus("running program");
+                ciObject = ci;
+              }
+            },
+            autoStart: true,
+            kiosk: false,
+            backend: "dosboxX"
+          });
+        } else if (result.output) {
+          setStatus("error");
+          document.getElementById("dosbox-container").style.display = "none";
+          document.getElementById("compiler-output").innerText = result.output;
+          document.getElementById("compiler-output").style.display = "block";
+        } else {
+          setStatus("unexpected response from the server");
+          document.getElementById("compiler-output").innerText = "Unexpected response from the server.";
+          document.getElementById("compiler-output").style.display = "block";
+        }
+      } catch (error) {
+        setStatus(error.message);
+        document.getElementById("compiler-output").innerText = "Failed to compile: " + error.message;
+        document.getElementById("compiler-output").style.display = "block";
+      }
+    }
+
+    const resizer = document.getElementById('resizer');
+    const leftPane = document.getElementById('left-pane');
+    const rightPane = document.getElementById('right-pane');
+    const container = document.querySelector('.container');
+    const codeEditor = editor;
+    let isResizing = false;
+
+    resizer.addEventListener('mousedown', () => {
+      isResizing = true;
+      document.body.style.cursor = 'ew-resize';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!isResizing) return;
+      const containerOffsetLeft = container.offsetLeft;
+      const pointerRelativeXpos = e.clientX - containerOffsetLeft;
+      const totalWidth = container.offsetWidth;
+      const leftWidth = Math.max(200, pointerRelativeXpos);
+      const rightWidth = Math.max(200, totalWidth - leftWidth - 5);
+      leftPane.style.flex = 'none';
+      rightPane.style.flex = 'none';
+      leftPane.style.width = `${leftWidth}px`;
+      rightPane.style.width = `${rightWidth}px`;
+    });
+
+    document.addEventListener('mouseup', () => {
+      if (isResizing) {
+        isResizing = false;
+        document.body.style.cursor = 'default';
+        codeEditor.focus();
+      }
+    });
+
+    // Double-click to center the divider
+    resizer.addEventListener('dblclick', () => {
+      const totalWidth = container.offsetWidth;
+      const half = (totalWidth - 5) / 2;
+      leftPane.style.flex = 'none';
+      rightPane.style.flex = 'none';
+      leftPane.style.width = `${half}px`;
+      rightPane.style.width = `${half}px`;
+      codeEditor.focus();
+    });
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(tc => tc.style.display = 'none');
+
+      document.querySelector(`.tab[onclick*="${tabId}"]`).classList.add('active');
+      document.getElementById(`tab-${tabId}`).style.display = 'block';
+    }
+  </script>
+</body>
+</html>

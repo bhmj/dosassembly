@@ -11,3 +11,5 @@ service:
   http:
     api_base: api
     port: 8080
+  playground_server: {{PLAYGROUND_SERVER}}
+  playground_api_token: {{PLAYGROUND_TOKEN}}

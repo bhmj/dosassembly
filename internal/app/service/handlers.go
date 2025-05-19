@@ -170,7 +170,12 @@ func parseResponse(buf string) (string, string, error) {
 
 	ifile := strings.Index(buf, streamFile)
 	if ifile > 1 {
-		return buf[ifile+len(streamFile)+3 : iend], "", nil // CR+LF+CR
+		// hotfix for random "\r": just cut them out
+		buf = buf[ifile+len(streamFile):]
+		buf = strings.ReplaceAll(buf, "\r", "")
+		buf = strings.ReplaceAll(buf, "\n", "")
+		iend = strings.Index(buf, streamEnd)
+		return buf[:iend], "", nil
 	}
 
 	return "", strings.ReplaceAll(buf[istart:iend], "\r\r", "\r"), nil

@@ -21,12 +21,12 @@ server {
 
     # robots etc
     location /robots.txt {
-        root /var/www/${DOSASM_DOMAIN}/;
+        root /var/www/static/${DOSASM_DOMAIN}/;
     }
 
     # index
     location / {
-        root /var/www/${DOSASM_DOMAIN}/;
+        root /var/www/static/${DOSASM_DOMAIN}/;
         # TODO: switch to templating!
         # proxy_pass http://dosasm_service;
         # proxy_read_timeout 300;

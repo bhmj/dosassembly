@@ -1,5 +1,5 @@
 upstream dosasm_service {
-    server ${DOSASM_MAIN}:${DOSASM_API_PORT};
+    server ${DOSASM_UPSTREAM}:${DOSASM_API_PORT};
 }
 
 server {

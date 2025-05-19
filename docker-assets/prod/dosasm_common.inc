@@ -14,6 +14,8 @@ location /robots.txt {
 
 # index
 location / {
+    index index.html;
+    ssi on;
     root /var/www/static/${DOSASM_DOMAIN}/;
     # TODO: switch to templating!
     # proxy_pass http://dosasm_service;

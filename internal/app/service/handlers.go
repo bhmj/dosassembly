@@ -124,10 +124,13 @@ func (s *Service) RunProgram(w http.ResponseWriter, r *http.Request) int {
 
 func readSSEStreams(r *http.Response, streams []string) (string, error) {
 	scanner := bufio.NewScanner(r.Body)
-	var data string
-	replacer := strings.NewReplacer("\\n", "\n", "\\\\", "\\")
-	reading := false
 
+	// replacer restores the original byte sequence.
+	// See combobox/internal/app/cman/service/handlers.go:68
+	replacer := strings.NewReplacer(`\:`, `:`, `\n`, "\n", `\r`, "\r", `\\`, `\`)
+
+	var data string
+	reading := false
 	for scanner.Scan() {
 		line := scanner.Text()
 		if line == "" {
@@ -135,17 +138,18 @@ func readSSEStreams(r *http.Response, streams []string) (string, error) {
 		}
 
 		if strings.HasPrefix(line, "event: ") {
-			event := strings.TrimSpace(line[7:])
+			event := strings.TrimSpace(line[7:]) // we do not expect any spaces nor newlines, get rid of them.
 			reading = false
 			for _, stream := range streams {
 				if strings.HasPrefix(event, stream) {
-					reading = true
+					reading = true // next "data" field must be read
 					break
 				}
 			}
 		} else if strings.HasPrefix(line, "data: ") {
 			if reading {
-				data += replacer.Replace(line[6:])
+				str := replacer.Replace(line[6:])
+				data += str
 			}
 		}
 	}
@@ -156,6 +160,9 @@ func parseResponse(buf string) (string, string, error) {
 	const streamStart = "::STREAM::START"
 	const streamFile = "::STREAM::FILE"
 	const streamEnd = "::STREAM::END"
+
+	// the buf may contain mixed 'CRLF' or 'LF' line feeds. We want to convert them to Linux style
+	buf = strings.ReplaceAll(buf, "\r\n", "\n")
 
 	istart := strings.Index(buf, streamStart)
 	if istart == -1 {

@@ -667,10 +667,11 @@ LONG    equ     31
         mov     cx,256
 @@pal:  mov     ax,256
         sub     ax,cx
+        shr     ax,1
+        out     dx,al
+        shr     ax,1
+        out     dx,al
         shr     ax,2
-        out     dx,al
-        xor     ax,ax
-        out     dx,al
         out     dx,al
         loop    @@pal
 ; buffer
@@ -783,6 +784,8 @@ END     Start
     editor.setTheme("ace/theme/dawn");
     editor.session.setMode("ace/mode/assembly_x86");
     editor.setShowPrintMargin(false);
+    editor.moveCursorTo(0, 0);
+    editor.focus();
     //editor.getSession().on('change', onChange.bind(this, note, cEditor[id]));
 
     function setStatus(str) {

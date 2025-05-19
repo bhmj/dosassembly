@@ -10,7 +10,7 @@ networks:
     name: dosasm_net
 
 services:
-  dosassembly:
+  dosasm:
     user: ${USER}
     image: "dosassembly"
     restart: always

@@ -1,10 +1,10 @@
 ## Issues
-    - random '\r' in server output
+    + random '\r' in server output
 
 ## Refactoring
     + move ace cursor to 0:0
-    - fix dark theme
-      - store theme name is local storage
+    + fix dark theme
+    - store theme name in local storage
     - add DB support
       - tables
         - sources: SRCID, txt, asm type

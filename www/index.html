@@ -13,12 +13,6 @@
   <script src="https://v8.js-dos.com/latest/js-dos.js"></script>
   <style>
     :root {
-      --bg-color: #f9f9f9;
-      --text-color: #333;
-      --header-bg: #ffffff;
-      --status-bg: #eeeeee;
-      --tab-bg: #e0e0e0;
-      --active-tab-bg: #ccc;
       /*JS-DOS consts */
       --sidebar-width: 3rem;
       --b3: 180 2% 90%;
@@ -29,14 +23,41 @@
       --animation-input: 0.2s;
       --handleoffset: 1.5rem;
     }
-
+    
+    [data-theme="light"] {
+      --bg-color: #f0f0f0;
+      --text-color: #333333;
+      --header-bg: #ffffff;
+      --line-color: #cccccc;
+      --control-bg: #007ac8;
+      --control-bg-hover: #228dd0;
+      --control-text: #ffffff;
+      --tab-content-bg: #eaeaea;
+      --status-bg: #eeeeee;
+      --tab-bg: #e0e0e0;
+      --active-tab-bg: #ccc;
+      --ace-scrollbar-bg: #f0f0f0;
+      --ace-scrollbar-track: #aaa;
+    }
+    
     [data-theme="dark"] {
-      --bg-color: #1e1e1e;
-      --text-color: #f0f0f0;
+      --bg-color: #252526;
+      --text-color: #b5b5b5;
       --header-bg: #2c2c2c;
+      --line-color: #3d3d3d;
+      --control-bg: #005b8d;
+      --control-bg-hover: #0f6d9f;
+      --control-text: #ffffff;
+      --tab-content-bg: #303030;
       --status-bg: #2a2a2a;
       --tab-bg: #444;
       --active-tab-bg: #666;
+      --ace-scrollbar-bg: #454545;
+      --ace-scrollbar-track: #2a2a2a;
+    }
+
+    .ace_scrollbar {
+      scrollbar-color: var(--ace-scrollbar-track) var(--ace-scrollbar-bg);
     }
 
     * {
@@ -54,13 +75,37 @@
       overflow: hidden;
     }
 
+    button {
+      background-color: var(--control-bg);
+      color: var(--control-text);
+      border-width: 0px;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: background-color 0.1s ease;
+    }
+
+    button:hover {
+      background-color: var(--control-bg-hover); /* Try to make it lighter */
+    }
+
+    select {
+      background-color: var(--header-bg);
+      color: var(--text-color);
+      border-color: var(--line-color);
+      border-top-width: 1px;
+      border-bottom-width: 1px;
+      border-left-width: 1px;
+      border-right-width: 1px;
+      border-radius: 2px;
+    }
+
     header {
       background-color: var(--header-bg);
       padding: 10px 20px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 1px solid #ccc;
+      border-bottom: 1px solid var(--line-color);
     }
 
     .header-left {
@@ -96,7 +141,7 @@
       cursor: pointer;
       top: 0; left: 0;
       right: 0; bottom: 0;
-      background-color: #ccc;
+      background-color: #aaa;
       border-radius: 34px;
       transition: .4s;
     }
@@ -146,12 +191,11 @@
 
     .code-editor {
       flex: 1;
-      border: 1px solid #ccc;
-      background: #fff;
       padding: 10px;
       overflow: auto;
       font-family: monospace;
       white-space: pre-wrap;
+      box-shadow: 0px 0px 0px 1px var(--line-color);
     }
 
     .code-editor:focus {
@@ -168,13 +212,13 @@
 
     .resizer {
       width: 5px;
-      background: #ccc;
+      background: var(--active-tab-bg);
       cursor: ew-resize;
       position: relative;
     }
-
+    
     .resizer:hover {
-      background: #44F;
+      background: #007FD0;
       cursor: ew-resize;
       position: relative;
     }
@@ -210,9 +254,9 @@
     .tab-content {
       flex: 1;
       /* padding: 10px; */
-      border: 1px solid #ccc;
+      border: 1px solid var(--line-color);
       border-top: none;
-      background: #f0f0f0;
+      background: var(--tab-content-bg);
       font-family: monospace;
       white-space: pre-wrap;
       overflow: auto;
@@ -225,7 +269,7 @@
     footer {
       background-color: var(--status-bg);
       padding: 8px 20px;
-      border-top: 1px solid #ccc;
+      border-top: 1px solid var(--line-color);
       font-size: 0.9em;
       text-align: left;
     }
@@ -779,6 +823,7 @@ END     Start
     ed.addEventListener("keyup", (e) => { e.stopPropagation(); });
 
     let editor = ace.edit("code-editor");
+    editor.setFontSize("14px");
     editor.setValue(defaultSourceCode);
     editor.clearSelection()
     editor.setKeyboardHandler("ace/keyboard/vscode");
@@ -796,7 +841,15 @@ END     Start
 
     function toggleTheme() {
       const body = document.body;
-      body.dataset.theme = body.dataset.theme === "dark" ? "light" : "dark";
+      if (body.dataset.theme == "dark") {
+        // setting light
+        editor.setTheme("ace/theme/dawn");
+        body.dataset.theme = "light";
+      } else {
+        // setting dark
+        editor.setTheme("ace/theme/ambiance");
+        body.dataset.theme = "dark";
+      }
     }
 
     function base64ToUint8Array(base64) {

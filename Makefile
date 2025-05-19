@@ -137,7 +137,7 @@ docker-build:
 develop-up: export DOSASM_UPSTREAM=host.docker.internal
 develop-up: build copy_static
 	docker compose -f docker-compose.dev.yaml up -d
-	./scripts/install_nginx_config.sh docker-assets/dev/nginx.conf.template dosasm
+	./scripts/install_nginx_config.sh docker-assets/dev/dosasm.conf dosasm
 
 develop-down:
 	docker compose -f docker-compose.dev.yaml down
@@ -145,7 +145,7 @@ develop-down:
 dev-up: export DOSASM_UPSTREAM=host.docker.internal
 dev-up: build copy_static
 	docker compose -f docker-compose.dev.short.yaml up -d
-	./scripts/install_nginx_config.sh docker-assets/dev/nginx.conf.template dosasm
+	./scripts/install_nginx_config.sh docker-assets/dev/dosasm.conf dosasm
 
 dev-down:
 	docker compose -f docker-compose.dev.short.yaml down
@@ -153,7 +153,7 @@ dev-down:
 prod-up: export DOSASM_UPSTREAM=dosasm
 prod-up: docker-build copy_static
 	docker compose -f docker-compose.prod.yaml up -d
-	./scripts/install_nginx_config.sh docker-assets/prod/nginx.conf.template dosasm
+	./scripts/install_nginx_config.sh docker-assets/prod/*.* dosasm
 
 prod-down:
 	docker compose -f docker-compose.prod.yaml down

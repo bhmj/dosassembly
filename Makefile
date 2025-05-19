@@ -44,21 +44,20 @@ export USAGE
 
 define SETUP_HELP
 
-This command will set up Combobox on the local machine. It requires sudo privileges to create required user and group.
+This command will set up DOSASM on the local machine. It requires sudo privileges to create required user and group.
 See ./scripts/setup-ser.sh for details.
 
 What it will do:
     - install dependencies and tools (linter)
     - create a local user for CMan (container manager)
     - create local directories for temporary and cache files
-    - build CMan images
 
 Press Enter to continue, Ctrl+C to quit
 endef
 export SETUP_HELP
 
 define CAKE
-   \e[1;31m. . .\e[0m
+   \033[1;31m. . .\033[0m
    i i i
   %~%~%~%
   |||||||
@@ -96,26 +95,71 @@ lint:
 test:
 	go test ./...	
 
-develop-up: 
+# application binary type for docker image
+export DOCKER_GOOS=linux
+export DOCKER_GOARCH=amd64
+# Go version to use while building binaries for docker image
+export GOLANG_VERSION=1.24
+# golang OS tag for building binaries for docker image
+export GOLANG_IMAGE=alpine 
+# target OS: the image type to run in production. Usually alpine fits OK.
+export TARGET_DISTR_TYPE=alpine
+# target OS version (codename)
+export TARGET_DISTR_VERSION=latest
+# a user created inside the container
+# files created by those services on mounted volumes will be owned by this user
+export DOCKER_USER=$(USER)
+
+define DOCKER_PARAMS
+--build-arg USER=$(DOCKER_USER) \
+--build-arg GOOS=$(DOCKER_GOOS) \
+--build-arg GOARCH=$(DOCKER_GOARCH) \
+--build-arg GOLANG_VERSION=$(GOLANG_VERSION) \
+--build-arg GOLANG_IMAGE=$(GOLANG_IMAGE) \
+--build-arg TARGET_DISTR_TYPE=$(TARGET_DISTR_TYPE) \
+--build-arg TARGET_DISTR_VERSION=$(TARGET_DISTR_VERSION) \
+--build-arg LDFLAGS="$(LDFLAGS)" \
+--file Dockerfile
+endef
+export DOCKER_PARAMS
+
+copy_static:
+	if [ ! -d "/var/nginx-proxy" ]; then echo "/var/nginx-proxy/ does not exist"; exit 1; fi
+	mkdir -p /var/nginx-proxy/static/$(DOSASM_DOMAIN)
+	printf "copying $$(pwd)/www -> /var/nginx-proxy/static/$(DOSASM_DOMAIN)\n"
+	find /var/nginx-proxy/static/$(DOSASM_DOMAIN)/ -mindepth 1 -delete
+	cp -r $$(pwd)/www/. /var/nginx-proxy/static/$(DOSASM_DOMAIN)/
+
+docker-build:
+	@echo docker build --tag dosassembly --target dosasm $(DOCKER_PARAMS) .
+	docker build --tag dosassembly --target dosasm $(DOCKER_PARAMS) .
+
+develop-up: export DOSASM_UPSTREAM=host.docker.internal
+develop-up: build copy_static
 	docker compose -f docker-compose.dev.yaml up -d
+	./scripts/install_nginx_config.sh docker-assets/dev/nginx.conf.template dosasm
 
 develop-down:
 	docker compose -f docker-compose.dev.yaml down
 
-dev-up:
+dev-up: export DOSASM_UPSTREAM=host.docker.internal
+dev-up: build copy_static
 	docker compose -f docker-compose.dev.short.yaml up -d
+	./scripts/install_nginx_config.sh docker-assets/dev/nginx.conf.template dosasm
 
 dev-down:
 	docker compose -f docker-compose.dev.short.yaml down
 
-prod-up: docker-build
+prod-up: export DOSASM_UPSTREAM=dosasm
+prod-up: docker-build copy_static
 	docker compose -f docker-compose.prod.yaml up -d
+	./scripts/install_nginx_config.sh docker-assets/prod/nginx.conf.template dosasm
 
 prod-down:
 	docker compose -f docker-compose.prod.yaml down
 
 cake:
-	OSTYPE=$$(uname); [ "$$OSTYPE" = "Darwin" ] && CAKE=$$(printf '%b' "$$CAKE" | sed 's/\\e/\\x1B/g'); echo "$$CAKE"
+	printf "%b\n" "$$CAKE"
 
 .PHONY: all build run lint test docker-build docker develop-up develop-down prod-up prod-down cake update-deps
 

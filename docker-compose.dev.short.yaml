@@ -1,0 +1,51 @@
+version: '3.8'
+
+volumes:
+  dosasm_db_data:
+  dosasm_prometheus:
+  dosasm_grafana:
+
+networks:
+  dosasm_net:
+    name: dosasm_net
+
+services:
+  dosassembly:
+    user: ${USER}
+    image: "dosassembly"
+    restart: always
+    command:
+      --config-file=/app/config/config.yaml
+    env_file:
+      - ".env"
+    volumes:
+      - ./www/static:/var/www/${HOST}/static
+      - ./www/templates:/var/www/${HOST}/templates
+      - ./config/dosassembly:/app/config
+      - ./sql:/app/migrations
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "3"
+        max-size: "50m"
+    depends_on:
+      - postgres
+    networks:
+      - dosasm_net
+  postgres:
+    image: "postgres:14-alpine"
+    restart: always
+    env_file:
+      - ".env"
+    volumes:
+      - ./docker-assets/postgresql/import:/tmp/import:ro
+      - type: volume
+        source: dosasm_db_data
+        target: /var/lib/postgresql/data
+    logging:
+      driver: "json-file"
+      options:
+        max-file: "3"
+        max-size: "50m"
+    networks:
+      - dosasm_net

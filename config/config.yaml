@@ -5,11 +5,11 @@ service:
   name: dosassembly
   prometheus:
     server:
-      port: 8081
+      port: {{DOSASM_METRICS_PORT}}
     metrics:
       namespace: dosassembly
   http:
     api_base: api
-    port: 8080
+    port: {{DOSASM_API_PORT}}
   playground_server: {{PLAYGROUND_SERVER}}
   playground_api_token: {{PLAYGROUND_TOKEN}}

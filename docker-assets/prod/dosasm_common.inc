@@ -31,7 +31,7 @@ location /api/ {
 }
 
 location ~ ^/(img)/ {
-    root /var/www/${DOSASM_DOMAIN};
+    root /var/www/static/${DOSASM_DOMAIN};
 }
 
 # Proxy all requests on port 3000 to Grafana

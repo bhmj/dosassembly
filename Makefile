@@ -153,7 +153,7 @@ dev-down:
 prod-up: export DOSASM_UPSTREAM=dosasm
 prod-up: docker-build copy_static
 	docker compose -f docker-compose.prod.yaml up -d
-	./scripts/install_nginx_config.sh docker-assets/prod/*.* dosasm
+	./scripts/install_nginx_config.sh "docker-assets/prod/*.*" dosasm
 
 prod-down:
 	docker compose -f docker-compose.prod.yaml down

@@ -21,7 +21,7 @@ services:
     volumes:
       - ./www/static:/var/www/${HOST}/static
       - ./www/templates:/var/www/${HOST}/templates
-      - ./config/dosassembly:/app/config
+      - ./config/dosasm:/app/config
       - ./sql:/app/migrations
     logging:
       driver: "json-file"

@@ -1,5 +1,5 @@
-upstream main_service {
-    server ${DOSASM_MAIN}:${API_PORT};
+upstream dosasm_service {
+    server ${DOSASM_MAIN}:${DOSASM_API_PORT};
 }
 
 server {
@@ -28,7 +28,7 @@ server {
     location / {
         root /var/www/${DOSASM_DOMAIN}/;
         # TODO: switch to templating!
-        # proxy_pass http://main_service;
+        # proxy_pass http://dosasm_service;
         # proxy_read_timeout 300;
         # proxy_connect_timeout 300;
         # proxy_send_timeout 300;
@@ -36,7 +36,7 @@ server {
 
     # api
     location /api/ {
-        proxy_pass  http://main_service;
+        proxy_pass  http://dosasm_service;
         proxy_read_timeout 300;
         proxy_connect_timeout 300;
         proxy_send_timeout 300; 

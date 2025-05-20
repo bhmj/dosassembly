@@ -6,11 +6,41 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="/js/ace/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+  <script src="/js/ace/src-noconflict/theme-ambiance.js"></script>
+  <script src="/js/ace/src-noconflict/theme-dawn.js"></script>
   <title>DOS Assembly</title>
   <!-- js-dos style sheet -->
   <!--link rel="stylesheet" href="https://v8.js-dos.com/latest/js-dos.css"-->
   <!-- js-dos -->
   <script src="https://v8.js-dos.com/latest/js-dos.js"></script>
+  <script>
+    var editor;
+    var editorTheme;
+
+    function toggleTheme(first) {
+      theme = localStorage.getItem("theme") || "light";
+      if (!first) {
+        if (theme=="dark") {
+          theme = "light";
+        } else {
+          theme = "dark";
+        }
+      }
+
+      if (theme == "dark") {
+        editorTheme = "ace/theme/ambiance";
+      } else {
+        editorTheme = "ace/theme/dawn";
+      }
+
+      if (editor) editor.setTheme(editorTheme);
+
+      document.documentElement.setAttribute("data-theme", theme);
+      localStorage.setItem("theme", theme);
+    };
+
+    toggleTheme(true);
+  </script>
   <style>
     :root {
       /*JS-DOS consts */
@@ -252,8 +282,6 @@
 
     .tab-content {
       flex: 1;
-      /* padding: 10px; */
-      border: 1px solid var(--line-color);
       border-top: none;
       background: var(--tab-content-bg);
       font-family: monospace;
@@ -641,7 +669,7 @@
     }
   </style>
 </head>
-<body data-theme="light">
+<body>
   <header>
     <div class="header-left">
       <img src="/img/dosasm-logo.png" alt="Logo">
@@ -821,34 +849,20 @@ END     Start
     ed.addEventListener("keypress", (e) => { e.stopPropagation(); });
     ed.addEventListener("keyup", (e) => { e.stopPropagation(); });
 
-    let editor = ace.edit("code-editor");
-    editor.setFontSize("14px");
-    editor.setValue(defaultSourceCode);
-    editor.clearSelection()
+    editor = ace.edit("code-editor", {
+      theme: editorTheme,
+      mode: "ace/mode/assembly_x86",
+      fontSize: "14px",
+      showPrintMargin: false,
+      //useWorker: false, // optional, to avoid delay due to syntax checking
+    });
+    editor.setValue(defaultSourceCode, -1);
     editor.setKeyboardHandler("ace/keyboard/vscode");
-    editor.setTheme("ace/theme/dawn");
-    editor.session.setMode("ace/mode/assembly_x86");
-    editor.setShowPrintMargin(false);
-    editor.moveCursorTo(0, 0);
     editor.focus();
-    //editor.getSession().on('change', onChange.bind(this, note, cEditor[id]));
 
     function setStatus(str) {
       let elem = document.getElementById("asm-status");
       elem.innerText = str;
-    }
-
-    function toggleTheme() {
-      const body = document.body;
-      if (body.dataset.theme == "dark") {
-        // setting light
-        editor.setTheme("ace/theme/dawn");
-        body.dataset.theme = "light";
-      } else {
-        // setting dark
-        editor.setTheme("ace/theme/ambiance");
-        body.dataset.theme = "dark";
-      }
     }
 
     function base64ToUint8Array(base64) {

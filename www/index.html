@@ -62,12 +62,14 @@
       --control-bg: #007ac8;
       --control-bg-hover: #228dd0;
       --control-text: #ffffff;
-      --tab-content-bg: #eaeaea;
-      --status-bg: #eeeeee;
+      --tab-content-bg: #f7f7f7;
+      --status-bg: #f5f5f5;
       --tab-bg: #e0e0e0;
       --active-tab-bg: #ccc;
       --ace-scrollbar-bg: #f0f0f0;
       --ace-scrollbar-track: #aaa;
+      --link: #0000EE;
+      --visited-link: #551A8B;
     }
     
     [data-theme="dark"] {
@@ -78,12 +80,14 @@
       --control-bg: #005b8d;
       --control-bg-hover: #0f6d9f;
       --control-text: #ffffff;
-      --tab-content-bg: #303030;
+      --tab-content-bg: #242424;
       --status-bg: #2a2a2a;
       --tab-bg: #444;
       --active-tab-bg: #666;
       --ace-scrollbar-bg: #454545;
       --ace-scrollbar-track: #2a2a2a;
+      --link: #969bff;
+      --visited-link: #696ed2;
     }
 
     .ace_scrollbar {
@@ -289,6 +293,15 @@
       overflow: auto;
     }
 
+    .tab-content a {
+      cursor: pointer;
+      color: var(--link);
+    }
+
+    .tab-content a:visited {
+      color: var(--visited-link);
+    }
+
     .compiler-output {
       padding: 1em;
     }
@@ -314,6 +327,10 @@
     #dosbox-container {
       width: 100%;
       height: 100%;
+    }
+
+    .center {
+      text-align:center;
     }
 
     /* JS-DOS styles */
@@ -696,7 +713,7 @@
           </select>
           <button onclick="runCom()">Run</button>
         </div>
-        <div id="code-editor" class="code-editor" contenteditable="true">// Write your assembly code here...</div>
+        <div id="code-editor" class="code-editor" contenteditable="true"></div>
       </div>
       <div class="resizer" id="resizer" title="Double-click to center"></div>
       <div class="right-pane" id="right-pane">
@@ -704,10 +721,17 @@
           <div class="tab active" onclick="switchTab('output')">Output</div>
           <div class="tab" onclick="switchTab('docs')">Documentation</div>
           <div class="tab" onclick="switchTab('examples')">Examples</div>
+          <div class="tab" onclick="switchTab('about')">About</div>
         </div>
         <div class="tab-content" id="tab-output"><div id="dosbox-container" ></div><div id="compiler-output"></div></div>
-        <div class="tab-content" id="tab-docs" style="display: none;">Assembly language documentation...</div>
-        <div class="tab-content" id="tab-examples" style="display: none;">Example programs go here...</div>
+        <div class="tab-content" id="tab-docs" style="display: none;">TODO: Assembly language documentation.
+        </div>
+        <div class="tab-content" id="tab-examples" style="display: none;">TODO: Example programs.
+        </div>
+        <div class="tab-content" id="tab-about" style="display: none;">
+          <p class="center">&copy; 2025 <a href="https://github.com/bhmj/" target=_blank>Michael Gurov<a></p>
+          <p class="center">✉️ <a href="mailto:i.gourov+dosasm@gmail.com">Drop me a line</a></p>
+        </div>
       </div>
     </div>
   </main>

@@ -40,6 +40,51 @@
     };
 
     toggleTheme(true);
+
+    function setStatus(str) {
+      let elem = document.getElementById("asm-status");
+      elem.innerText = str;
+    }
+
+    async function saveSource() {
+      const txt = editor.getValue();
+      const asm = document.getElementById("asm-lang").value;
+
+      const response = await fetch("/api/save/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ txt: txt, asm_type: asm })
+      });
+
+      if (!response.ok) {
+        setStatus("Network response was not OK");
+        return;
+      }
+
+      const data = await response.json();
+      if (!data || !data.token) {
+        setStatus("JSON read error");
+      }
+
+      const newUrl = `${window.location.origin}/${data.token}/`;
+      window.history.pushState({}, "", newUrl);
+
+      navigator.clipboard.writeText(newUrl).then(() => {
+        // Change button text to "Copied!"
+        saveButton = document.getElementById("save-button");
+        const originalText = saveButton.textContent;
+        saveButton.style.width = saveButton.offsetWidth+"px";
+        saveButton.textContent = "Copied";
+        saveButton.disabled = true;
+
+        // Revert after 1 second
+        setTimeout(() => {
+          saveButton.textContent = originalText;
+          saveButton.style.width = "";
+          saveButton.disabled = false;
+        }, 1000);
+      });
+    }
   </script>
   <style>
     :root {
@@ -259,8 +304,13 @@
 
     .control-bar {
       display: flex;
-      gap: 10px;
+      justify-content: space-between;
       margin-bottom: 10px;
+    }
+
+    .left-controls {
+      display: flex;
+      gap: 10px; /* Space between select and "Run" button */
     }
 
     select, button {
@@ -705,13 +755,16 @@
     <div class="container">
       <div class="left-pane" id="left-pane">
         <div class="control-bar">
-          <select id="asm-lang">
-            <option>TASM</option>
-            <option>MASM</option>
-            <option>NASM</option>
-            <option>FASM</option>
-          </select>
-          <button onclick="runCom()">Run</button>
+          <div class="left-controls">
+            <select id="asm-lang">
+              <option>TASM</option>
+              <option>MASM</option>
+              <option>NASM</option>
+              <option>FASM</option>
+            </select>
+            <button onclick="runCom()">Run</button>
+          </div>
+          <button id="save-button" onclick="saveSource()">Save and Copy URL</button>
         </div>
         <div id="code-editor" class="code-editor" contenteditable="true"></div>
       </div>
@@ -741,113 +794,8 @@
   </footer>
 
   <script>
-    defaultSourceCode = `IDEAL
-P386
-MODEL TINY
-CODESEG
-        ORG     100H
-Start:
-
-BLOB_X  equ     48
-BLOB_Y  equ     48
-LONG    equ     31
-
-; video
-        mov     ax,0013h
-        int     10h
-; palette
-        mov     dx,3C8h
-        xor     ax,ax
-        out     dx,al
-        inc     dx
-        mov     cx,256
-@@pal:  mov     ax,256
-        sub     ax,cx
-        shr     ax,1
-        out     dx,al
-        shr     ax,1
-        out     dx,al
-        shr     ax,2
-        out     dx,al
-        loop    @@pal
-; buffer
-        mov     ax,cs
-        add     ah,10h
-        mov     es,ax
-        mov     ch,0FAh
-        xor     ax,ax
-        xor     di,di
-        rep     stosw
-
-MainLoop:
-; blob
-        mov     di,[y]
-        shl     di,8
-        mov     ax,di
-        shr     ax,2
-        add     di,ax
-        add     di,[x]
-        mov     bx,BLOB_Y
-@@y:    mov     cx,BLOB_X
-@@x:    inc     [byte ptr es:di]
-        inc     di
-        loop    @@x
-        add     di,320-BLOB_X
-        dec     bx
-        jnz     @@y
-; swap to screen
-        push    es
-        pop     ds
-        push    0A000h
-        pop     es
-        xor     si,si
-        xor     di,di
-        mov     ch,7Dh
-        rep     movsw
-        push    ds
-        pop     es
-        push    cs
-        pop     ds
-; move
-        call    Random
-        test    al,LONG
-        jnz     @@m1
-        neg     [deltax]
-@@m1:   mov     ax,[deltax]
-        add     [x],ax
-        call    Random
-        test    al,LONG
-        jnz     @@m2
-        neg     [deltay]
-@@m2:   mov     ax,[deltay]
-        add     [y],ax
-; key
-        mov     ah,1
-        int     16h
-        jz      MainLoop
-; back to DOS
-        mov     ax,0003h
-        int     10h
-        int     16h
-        ret
-
-x       dw      100
-y       dw      100
-deltax  dw      1
-deltay  dw      1
-
-proc    Random
-        mov     eax,[Seed]
-        imul    [RandMul]
-        dec     eax
-        mov     [Seed],eax
-        shr     eax,16
-RandMul dd      015A4EC3h ; <-- ret
-Seed    dd      1
-endp    Random
-
-END     Start
-`
+    sourceCode = `{{.Source}}`;
+    document.getElementById("asm-lang").value = `{{.AsmType}}`;
 
     dosboxConf = `
       [sdl]
@@ -880,14 +828,9 @@ END     Start
       showPrintMargin: false,
       //useWorker: false, // optional, to avoid delay due to syntax checking
     });
-    editor.setValue(defaultSourceCode, -1);
+    editor.setValue(sourceCode, -1);
     editor.setKeyboardHandler("ace/keyboard/vscode");
     editor.focus();
-
-    function setStatus(str) {
-      let elem = document.getElementById("asm-status");
-      elem.innerText = str;
-    }
 
     function base64ToUint8Array(base64) {
       const binaryString = atob(base64); // Decode base64 to binary string

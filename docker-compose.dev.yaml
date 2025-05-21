@@ -35,6 +35,8 @@ services:
   postgres:
     image: "postgres:14-alpine"
     restart: always
+    ports:
+      - "5444:5432"
     env_file:
       - ".env"
     volumes:
@@ -53,7 +55,7 @@ services:
     image: "prom/prometheus"
     restart: always
     volumes:
-      - ./docker-assets/prometheus:/etc/prometheus
+      - ./docker-assets/dev/prometheus:/etc/prometheus # main service only (fcache ignored in dev environment)
       - type: volume
         source: dosasm_prometheus
         target: /prometheus

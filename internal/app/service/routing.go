@@ -12,7 +12,7 @@ import (
 )
 
 type (
-	HandlerWithResult func(w http.ResponseWriter, r *http.Request) int
+	HandlerWithResult func(w http.ResponseWriter, r *http.Request) (int, error)
 )
 
 type rawHandlerDefinition struct {
@@ -23,18 +23,15 @@ type rawHandlerDefinition struct {
 
 // GetHandlers returns a list of handlers for the server
 func (s *Service) GetHandlers() (handlers []HandlerDefinition) {
-	web := func(path string) string {
-		return fmt.Sprintf("/web%s", path)
-	}
 	api := func(path string) string {
 		return fmt.Sprintf("/%s%s", s.cfg.HTTP.APIBase, path)
 	}
 	raw := []rawHandlerDefinition{
-		{Method: "GET", Path: "/", Func: s.Index},
-		{Method: "GET", Path: "/about/", Func: s.About},
-		{Method: "POST", Path: web("/refresh/"), Func: s.WebRefresh},
-		{Method: "POST", Path: api("/compile/"), Func: s.Compile},
-		{Method: "OPTIONS", Path: api("/compile/"), Func: s.CompileCORS},
+		{Method: "GET", Path: "/", Func: s.HandleIndex},
+		{Method: "GET", Path: "/{source_token:[a-zA-Z0-9]{6}}/", Func: s.HandleIndexWithToken},
+		{Method: "POST", Path: api("/save/"), Func: s.HandleSave},
+		{Method: "POST", Path: api("/compile/"), Func: s.HandleCompile},
+		{Method: "OPTIONS", Path: api("/compile/"), Func: s.HandleCompileCORS},
 	}
 	for i := range raw {
 		handler := HandlerDefinition{
@@ -109,13 +106,15 @@ func (s *Service) responderMiddleware(fn HandlerWithResult, backendName, handler
 		logger.Info("started serving request")
 
 		start := time.Now()
-		result := fn(w, r)
+		code, err := fn(w, r)
+		if err != nil {
+			logger.Error(fmt.Sprintf("%v", err))
+			s.replier.ReplyError(w, err, code)
+		}
 		duration := time.Since(start)
 
-		s.apiMetrics.ScoreAPI(backendName, handlerName, result, duration)
+		s.apiMetrics.ScoreAPI(backendName, handlerName, code, duration)
 
-		//p.replier.ReplyJSONCode(w, result.Response, result.HTTPCode)
-
-		logger.Info("finish serving request", log.Int("http_code", result), log.Duration("duration", duration))
+		logger.Info("finish serving request", log.Int("http_code", code), log.Duration("duration", duration))
 	}
 }

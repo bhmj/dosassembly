@@ -71,6 +71,7 @@ help:
 setup:
 	@echo "$$SETUP_HELP"
 	read
+	docker volume create dosassembly_dosasm_grafana
 	./scripts/setup-user.sh
 	./scripts/build-images.sh now
 
@@ -137,7 +138,7 @@ docker-build:
 develop-up: export DOSASM_UPSTREAM=host.docker.internal
 develop-up: build copy_static
 	docker compose -f docker-compose.dev.yaml up -d
-	./scripts/install_nginx_config.sh docker-assets/dev/dosasm.conf dosasm
+	./scripts/install_nginx_config.sh docker-assets/dev/nginx/dosasm.conf dosasm
 
 develop-down:
 	docker compose -f docker-compose.dev.yaml down
@@ -145,7 +146,7 @@ develop-down:
 dev-up: export DOSASM_UPSTREAM=host.docker.internal
 dev-up: build copy_static
 	docker compose -f docker-compose.dev.short.yaml up -d
-	./scripts/install_nginx_config.sh docker-assets/dev/dosasm.conf dosasm
+	./scripts/install_nginx_config.sh docker-assets/dev/nginx/dosasm.conf dosasm
 
 dev-down:
 	docker compose -f docker-compose.dev.short.yaml down
@@ -153,10 +154,17 @@ dev-down:
 prod-up: export DOSASM_UPSTREAM=dosasm
 prod-up: docker-build copy_static
 	docker compose -f docker-compose.prod.yaml up -d
-	./scripts/install_nginx_config.sh "docker-assets/prod/*.*" dosasm
+	./scripts/install_nginx_config.sh "docker-assets/prod/nginx/*.*" dosasm
 
 prod-down:
 	docker compose -f docker-compose.prod.yaml down
+
+db:
+	docker volume create dosassembly_dosasm_db_data
+	docker run -d --rm -v dosassembly_dosasm_db_data:/var/lib/postgresql/data -e POSTGRES_PASSWORD=$(DB_PASSWORD) --name dosasm_postgres postgres:14-alpine
+	sleep 1
+	docker exec dosasm_postgres sh -c 'psql -U postgres -c "create database dosasm_1;"'
+	docker stop dosasm_postgres
 
 cake:
 	printf "%b\n" "$$CAKE"

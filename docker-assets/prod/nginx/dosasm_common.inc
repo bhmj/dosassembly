@@ -12,16 +12,20 @@ location /robots.txt {
     root /var/www/static/${DOSASM_DOMAIN}/;
 }
 
+# saved source
+location ~ ^/([A-Za-z0-9])/?$ {
+    proxy_pass http://dosasm_service;
+    proxy_read_timeout 300;
+    proxy_connect_timeout 300;
+    proxy_send_timeout 300;
+}
+
 # index
 location / {
-    index index.html;
-    ssi on;
-    root /var/www/static/${DOSASM_DOMAIN}/;
-    # TODO: switch to templating!
-    # proxy_pass http://dosasm_service;
-    # proxy_read_timeout 300;
-    # proxy_connect_timeout 300;
-    # proxy_send_timeout 300;
+    proxy_pass http://dosasm_service;
+    proxy_read_timeout 300;
+    proxy_connect_timeout 300;
+    proxy_send_timeout 300;
 }
 
 # api
@@ -32,7 +36,7 @@ location /api/ {
     proxy_send_timeout 300; 
 }
 
-location ~ ^/(img)/ {
+location ~ ^/(img|js)/ {
     root /var/www/static/${DOSASM_DOMAIN};
 }
 

@@ -55,7 +55,7 @@ services:
     image: "prom/prometheus"
     restart: always
     volumes:
-      - ./docker-assets/prometheus:/etc/prometheus
+      - ./docker-assets/prod/prometheus:/etc/prometheus
       - type: volume
         source: dosasm_prometheus
         target: /prometheus

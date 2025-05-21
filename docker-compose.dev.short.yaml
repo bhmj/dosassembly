@@ -19,8 +19,7 @@ services:
     env_file:
       - ".env"
     volumes:
-      - ./www/static:/var/www/${HOST}/static
-      - ./www/templates:/var/www/${HOST}/templates
+      - ./www/templates:/app/www/templates
       - ./config/dosasm:/app/config
       - ./sql:/app/migrations
     logging:

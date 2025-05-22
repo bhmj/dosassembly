@@ -5,6 +5,7 @@
   <link rel="icon" href="/img/dosasm-favicon.ico" type="image/x-icon"/>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script type="text/javascript" src="/js/common.js"></script>
   <script src="/js/ace/src-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
   <script src="/js/ace/src-noconflict/theme-ambiance.js"></script>
   <script src="/js/ace/src-noconflict/theme-dawn.js"></script>
@@ -125,7 +126,7 @@
       --control-bg: #005b8d;
       --control-bg-hover: #0f6d9f;
       --control-text: #ffffff;
-      --tab-content-bg: #242424;
+      --tab-content-bg: #2b2b2b;
       --status-bg: #2a2a2a;
       --tab-bg: #444;
       --active-tab-bg: #666;
@@ -356,6 +357,14 @@
       padding: 1em;
     }
 
+    #tab-examples {
+      padding: 1em;
+    }
+
+    .size-label {
+      color:#288c28;
+    }
+
     footer {
       background-color: var(--status-bg);
       padding: 8px 20px;
@@ -383,7 +392,34 @@
       text-align:center;
     }
 
-    /* JS-DOS styles */
+    #examples-viewport {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: stretch;
+      gap: 1em;
+    }
+
+    .example-container {
+      display: flex;
+      flex-direction: column;
+      width: 320px;
+      background-color: rgba(0,0,0,0.2);
+      cursor: pointer;
+    }
+
+    .example-image {
+      width: 320px;
+      height: 200px;
+      background-position: center center;
+    }
+
+    .example-text {
+      cursor: default;
+      margin: 1em;
+      flex-grow: 1;
+    }
+
+    /* JS-DOS styles ========================================================================= */
 
     .jsdos-rso .overflow-hidden {
       overflow: hidden;
@@ -779,7 +815,18 @@
         <div class="tab-content" id="tab-output"><div id="dosbox-container" ></div><div id="compiler-output"></div></div>
         <div class="tab-content" id="tab-docs" style="display: none;">TODO: Assembly language documentation.
         </div>
-        <div class="tab-content" id="tab-examples" style="display: none;">TODO: Example programs.
+        <div class="tab-content" id="tab-examples" style="display: none;"><div><select id="size-select" onchange="viewExamples()">
+              <option value="*" selected>All sizes</option>
+              <option value="32b">32 bytes</option>
+              <option value="64b">64 bytes</option>
+              <option value="128b">128 bytes</option>
+              <option value="256b">256 bytes</option>
+              <option value="512b">512 bytes</option>
+              <option value="1k">1K bytes</option>
+            </select>
+          </div>
+          <div id="examples-viewport">
+          </div>
         </div>
         <div class="tab-content" id="tab-about" style="display: none;">
           <p class="center">&copy; 2025 <a href="https://github.com/bhmj/" target=_blank>Michael Gurov<a></p>
@@ -789,11 +836,30 @@
     </div>
   </main>
 
+  <script type="text/html" class="template-example">
+    <div class="example-container">
+      <div class="example-image" onclick="loadExample(<%=id%>);" style="background-image:url(/img/examples/<%=size%>/<%=image%>);"></div>
+      <div class="example-text"><%=descr%><%=link%><%=rating%></div>
+    </div>
+  </script>
+
   <footer>
     Status: <span id="asm-status">ready</span>
   </footer>
 
   <script>
+    var examples = formatExamples({{.Examples}});
+
+    function formatExamples(ex) {
+      let xlat = {"32b":"32 bytes", "64b":"64 bytes", "128b":"128 bytes", "256b":"256 bytes", "512b":"512 bytes", "1k":"1k"};
+      for (let i=0; i<ex.length; i++) {
+        ex[i].descr = `<span class="size-label">[`+xlat[ex[i].size]+`]</span> `+ex[i].descr.replace(/\*(.*?)\*/gi, "<b>$1</b>");
+        if (ex[i].link.length) ex[i].link = ` [<a href="`+ex[i].link+`" target=_blank>link</a>]`;
+        if (ex[i].rating) ex[i].rating = ` rating: `+ex[i].rating/100;
+      }
+      return ex;
+    }
+
     sourceCode = `{{.Source}}`;
     document.getElementById("asm-lang").value = `{{.AsmType}}`;
 
@@ -845,11 +911,9 @@
     }
 
     async function runCom() {
-      const base64Com = "jMiAxBCOwLgAAM0zPQAAdAbHBrgCAQC4EwDNELgEALlAAbpkAM0zuAcAuWQAuhwCzTO6yAOwAe5Cuf8Ai8HB6ALu7u7i9rkAfTP/6EgBq+L6ugUAvgAAuQD66I0ASnX0Bg+hgz64AgB0DMcGugIAAMcGvAIAAGgAoAdg6JcAYYM+uAIBdBb/BroC/wa8Av8GwgKBPsICyABzSus+uAMAzTPR6YHpoACD6mSJDroCiRa8AvfDAgB0EA+gB7kAfTP/6NMAq+L66xL3wwEAdAy+AAC5APoPoAfoEAC0Ac0WdJYzwM0WuAMAzRDDHgYfM9uKXAGLw4pc/wPDipzA/gPDipxAAQPDwegCCsB0Av7IiARG4tofw8cGvgIAAL9BAb6d/71i/2QPtkUBZA+2Xf4rw4vd0fsrHroCK8NkD7aNQAFkD7aVgP0ryovW0forFrwCK8oPr8MPr8oDwZkzwivCwegEQArkdAKw/4sewAI5Hr4CfA7324HDxwA5Hr4CdwKqT0dFgf2fAH6b/wa+AkdHRoP+Y36Mw2ZSZi6htAJmLvcusAJmWmZIZi6jtAJmwegQw05aAQEAAAAAAJz/nf8AAAcAAABNSg==";
-      const dummyCom = base64ToUint8Array(base64Com);
+      switchTab('output');
 
       sourceCode = editor.getValue();
-
       try {
         setStatus("sending query...");
         let langs = document.getElementById("asm-lang");
@@ -866,6 +930,7 @@
 
         if (result.base64) {
           const dummyCom = base64ToUint8Array(result.base64);
+          const size = dummyCom.length;
 
           document.getElementById("dosbox-container").style.display = "block";
           document.getElementById("dosbox-container").tabIndex = 0;
@@ -886,7 +951,7 @@
                 setStatus("bundle ready");
               }
               if (event === "ci-ready") {
-                setStatus("running program");
+                setStatus("running program ("+size+" bytes)");
                 ciObject = ci;
               }
             },
@@ -961,6 +1026,33 @@
 
       document.querySelector(`.tab[onclick*="${tabId}"]`).classList.add('active');
       document.getElementById(`tab-${tabId}`).style.display = 'block';
+    }
+
+    function viewExamples() {
+      sz = document.getElementById("size-select").value;
+      let list = [];
+      for (let i=0; i<examples.length; i++) {
+        if (examples[i].size == sz || sz == "*") list.push(examples[i]);
+      }
+      let html = nsTmpl.tmplr("template-example", list);
+      document.getElementById("examples-viewport").innerHTML = html;
+    }
+
+    viewExamples();
+
+    async function loadExample(id) {
+      let ex;
+      for (let i=0; i<examples.length; i++) {
+        if (examples[i].id == id) {
+          ex = examples[i];
+          break;
+        }
+      }
+      let response = await fetch(`/examples/${ex.size}/${ex.fname}`);
+      if (response.status != 200) return;
+      let src = await response.text();
+      document.getElementById("asm-lang").value = ex.asm_type;
+      editor.setValue(src, -1);
     }
   </script>
 </body>

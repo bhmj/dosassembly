@@ -68,8 +68,9 @@ func (s *Service) ReplyStoredProcedure(w http.ResponseWriter, procName string, a
 }
 
 type indexData struct {
-	Source  string `db:"txt"`
-	AsmType string `db:"asm_type"`
+	Source   string `db:"txt"`
+	AsmType  string `db:"asm_type"`
+	Examples string
 }
 
 func (s *Service) index(w http.ResponseWriter, token string) error {
@@ -77,7 +78,7 @@ func (s *Service) index(w http.ResponseWriter, token string) error {
 	if token != "" {
 		found, err := s.db.QueryRow(&data, "select txt, asm_type from public.sources where token = $1", token)
 		if err != nil {
-			return err //nolint:errorwrap
+			return err //nolint:wrapcheck
 		}
 		if !found {
 			data.Source = "Specified source ID not found"
@@ -90,14 +91,35 @@ func (s *Service) index(w http.ResponseWriter, token string) error {
 		data.AsmType = defaultAsmType
 	}
 
+	type exampleRow struct {
+		ID       int    `db:"id" json:"id"`
+		Filename string `db:"txt_filename" json:"fname"`
+		Image    string `db:"image_filename" json:"image"`
+		Size     string `db:"size_category" json:"size"`
+		AsmType  string `db:"asm_type" json:"asm_type"`
+		Descr    string `db:"descr" json:"descr"`
+		Link     string `db:"link" json:"link"`
+		Rating   int    `db:"rating" json:"rating"`
+	}
+	var examples []exampleRow
+	err := s.db.Query(&examples, "select id, txt_filename, image_filename, size_category, asm_type, descr, link, rating from public.examples")
+	if err != nil {
+		return err //nolint:wrapcheck
+	}
+	buf, err := json.Marshal(examples)
+	if err != nil {
+		return err //nolint:wrapcheck
+	}
+	data.Examples = string(buf)
+
 	// parse template
 	tmplpath, err := filepath.Abs(s.cfg.TemplatesPath)
 	if err != nil {
-		return err //nolint:errorwrap
+		return err //nolint:wrapcheck
 	}
 	indexTemplate, err := template.ParseFiles(path.Join(tmplpath, "index.html"))
 	if err != nil {
-		return err //nolint:errorwrap
+		return err //nolint:wrapcheck
 	}
 	w.Header().Set("Content-Type", "text/html")
 	w.Header().Set("X-Frame-Options", "DENY")

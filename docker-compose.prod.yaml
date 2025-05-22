@@ -20,6 +20,7 @@ services:
       - ".env"
     volumes:
       - ./www/templates:/app/www/templates
+      - ./www/examples:/app/www/examples
       - ./config/dosasm:/app/config
       - ./sql:/app/migrations
     logging:

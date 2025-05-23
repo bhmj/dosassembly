@@ -293,110 +293,202 @@ func parseResponse(buf string) (string, string, error) {
 }
 
 const defaultAsmType = "TASM"
-const defaultSource = `IDEAL
-P386
-MODEL TINY
-CODESEG
-        ORG     100H
+const defaultSource = `.model small
+.386
+.code
+
+assume  cs:_TEXT, ds:_TEXT
+
+LEFT_FIELD      equ     60
+BOBSIZE         equ     16
+COLOR           equ     32
+
+BOBS            equ     17
+
+        org     100h
 Start:
 
-BLOB_X  equ     48
-BLOB_Y  equ     48
-LONG    equ     31
+; Generate bobs --------------------------------------------
+        mov     di,offset Coord
+        mov     eax,00100030h
+        mov     cx,BOBS
+        rep     stosd
 
-; video
-        mov     ax,0013h
+        mov     al,13h
         int     10h
-; palette
-        mov     dx,3C8h
+
+; Create buffer --------------------------------------------
+        mov     ax,cs
+        add     ax,(300h)/16+1
+        mov     es,ax
+        ; Clear buffer
+        xor     di,di
+        mov     ch,07Dh         ; CX = 32000
         xor     ax,ax
+        rep     stosw           ; CX==0
+
+; Generate palette ------------------------------------------
+        mov     dx,3C8h
         out     dx,al
         inc     dx
-        mov     cx,256
-@@pal:  mov     ax,256
-        sub     ax,cx
+@@SetPal:
+        mov     ax,cx
         shr     ax,1
-        out     dx,al
+        out     dx,al   ; R
+        out     dx,al   ; G
         shr     ax,1
-        out     dx,al
-        shr     ax,2
-        out     dx,al
-        loop    @@pal
-; buffer
-        mov     ax,cs
-        add     ah,10h
-        mov     es,ax
-        mov     ch,0FAh
-        xor     ax,ax
-        xor     di,di
-        rep     stosw
+        out     dx,al   ; B
+        inc     cl
+        jnz     @@SetPal
 
-MainLoop:
-; blob
-        mov     di,[y]
-        shl     di,8
-        mov     ax,di
-        shr     ax,2
-        add     di,ax
-        add     di,[x]
-        mov     bx,BLOB_Y
-@@y:    mov     cx,BLOB_X
-@@x:    inc     [byte ptr es:di]
-        inc     di
-        loop    @@x
-        add     di,320-BLOB_X
+; Main loop:
+@@Continue:
+; MovePoints ---------------------------------------------
+        mov     cl,BOBS*2
+        lea     si,Step
+        lea     di,Coord
+        lea     bx,Bounds
+@@MP1:
+        movsx   ax,[si]                 ; load step
+        add     [di],ax                 ; coord[i] += step[i]
+        mov     dx,[bx]                 ; load left/top bound
+        inc     bx
+        inc     bx
+        cmp     word ptr [di],dx        ; if coord is out of bound..
+        jl      @@MP2                   ; ..negate step
+        mov     dx,[bx]                 ; load right/bottom bound
+        cmp     word ptr [di],dx        ; if coord is out of bound..
+        jle     @@MP3
+@@MP2:
+        neg     byte ptr [si]
+@@MP3:
         dec     bx
-        jnz     @@y
-; swap to screen
+        dec     bx
+        inc     si
+        inc     di
+        inc     di
+        loop    @@MP1
+
+; Draw ----------------------------------------------------------
+        lea     bx,Coord
+        mov     cl,BOBS
+@@DFor:
+        push    cx
+        mov     di,[bx]         ; Xi
+        add     di,LEFT_FIELD
+        mov     ax,[bx+2]       ; Yi
+        mov     dx,320
+        mul     dx
+        add     di,ax
+
+        mov     cl,BOBSIZE
+@@D1:   push    cx
+        mov     cl,BOBSIZE
+@@D2:   mov     al,byte ptr es:[di]
+        add     al,COLOR
+        jnc     @@D3
+        mov     al,0FFh
+@@D3:   stosb
+        loop    @@D2
+        add     di,320-BOBSIZE
+        pop     cx
+        loop    @@D1
+
+        pop     cx
+        add     bx,4            ; !!!
+        loop    @@DFor
+
+        push    ds
+        push    es
+
         push    es
         pop     ds
+; Fire --------------------------------------------------------
+        mov     si,320
+        mov     di,si
+        mov     cx,64000-320*2
+@@F1:
+        xor     bx,bx
+        mov     bl,byte ptr [si-1]
+        mov     ax,bx
+        mov     bl,byte ptr [si+1]
+        add     ax,bx
+        mov     bl,byte ptr [si-320]
+        add     ax,bx
+        mov     bl,byte ptr [si+320]
+        add     ax,bx
+        shr     ax,2
+        jz      @@F2
+        dec     ax
+@@F2:   stosb
+        inc     si
+        loop    @@F1
+
+; CopyScreen ------------------------------------------------
         push    0A000h
         pop     es
         xor     si,si
         xor     di,di
-        mov     ch,7Dh
+        mov     ch,7Dh          ; CX = 32000
         rep     movsw
-        push    ds
+
         pop     es
-        push    cs
         pop     ds
-; move
-        call    Random
-        test    al,LONG
-        jnz     @@m1
-        neg     [deltax]
-@@m1:   mov     ax,[deltax]
-        add     [x],ax
-        call    Random
-        test    al,LONG
-        jnz     @@m2
-        neg     [deltay]
-@@m2:   mov     ax,[deltay]
-        add     [y],ax
-; key
-        mov     ah,1
+
+; Check for ESC pressed
+        mov     ah,01
         int     16h
-        jz      MainLoop
-; back to DOS
+        jz      @@Continue
+
         mov     ax,0003h
         int     10h
         int     16h
+
         ret
 
-x       dw      100
-y       dw      100
-deltax  dw      1
-deltay  dw      1
+; End of main()
 
-proc    Random
-        mov     eax,[Seed]
-        imul    [RandMul]
-        dec     eax
-        mov     [Seed],eax
-        shr     eax,16
-RandMul dd      015A4EC3h ; <-- ret
-Seed    dd      1
-endp    Random
+; Data ==============================================
 
-END     Start
+Bounds  label
+        dw      15
+        dw      320-LEFT_FIELD*2-BOBSIZE-15
+Step    label
+        db      +2
+        db      +6      ; 1
+        db      +2
+        db      +4      ; 2
+        db      +3
+        db      +5      ; 3
+        db      +4
+        db      -4      ; 4
+        db      +5
+        db      -2      ; 5
+        db      +6
+        db      -1      ; 6
+        db      -1
+        db      +7      ; 7
+        db      -2
+        db      +4      ; 8
+        db      -3
+        db      +5      ; 9
+        db      -4
+        db      +3      ; 10
+        db      -5
+        db      +3      ; 11
+        db      -5
+        db      -4      ; 12
+        db      +2
+        db      -6      ; 13
+        db      +3
+        db      +2      ; 14
+        db      +2
+        db      -4      ; 15
+        db      +3
+        db      -3      ; 16
+        db      +7
+        db      -2      ; 17
+Coord   label
+
+end     Start
 `

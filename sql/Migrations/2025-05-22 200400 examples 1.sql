@@ -10,7 +10,7 @@ VALUES
 ('firewave.asm', 'firewave.gif', '32b', 'NASM', '*firewave* by *HellMood/DESiRE*, aug 2016', 'https://www.pouet.net/prod.php?which=67949', 97),
 ('garguy.asm', 'garguy32.png', '32b', 'NASM', '*garguy* by *HellMood/DESiRE*, mar 2020', 'https://www.pouet.net/prod.php?which=84977', 92),
 ('kevin.asm', 'kevins_nightmare.png', '32b', 'NASM', '*Kevin''s nightmare* by *HellMood/DESiRE*, may 2021, 1st at Outline 2021', 'https://www.pouet.net/prod.php?which=88983', 92),
-('klapquad.asm', 'klapquad.png', '32b', 'NASM', '*Klappquadrat* by T$, feb 2004, 1st at 0a000h 2004', 'https://www.pouet.net/prod.php?which=11670', 95),
+('klapquad.asm', 'klapquad.png', '32b', 'NASM', '*Klappquadrat* by *T$*, feb 2004, 1st at 0a000h 2004', 'https://www.pouet.net/prod.php?which=11670', 95),
 ('kristal.asm', 'kristal.png', '32b', 'NASM', '*kristal* by *Řrřola*, jan 2007', 'https://www.pouet.net/prod.php?which=29157', 93),
 ('lgbt19b.asm', 'lgbt19b.png', '32b', 'NASM', '*lgbt19b* by *HellMood/DESiRE*, aug 2020', 'https://www.pouet.net/prod.php?which=86872', 75),
 ('m8trix.asm', 'm8trix_8b.gif', '32b', 'NASM', '*m8trix8b*, may 2014', 'https://www.pouet.net/prod.php?which=63126', 96),

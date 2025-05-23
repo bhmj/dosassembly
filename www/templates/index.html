@@ -873,6 +873,25 @@
       [render]
       vsync=true
       frameskip=0
+      [mixer]
+      nosound=false
+      rate=44100
+      blocksize=1024
+      prebuffer=25
+      [midi]
+      mpu401=uart
+      mididevice=default
+      midiconfig=
+      [sblaster]
+      sbtype=sb16
+      sbbase=220
+      irq=7
+      dma=1
+      hdma=5
+      sbmixer=true
+      oplmode=auto
+      oplemu=default
+      oplrate=44100
       [autoexec]
       mount c .
       c:

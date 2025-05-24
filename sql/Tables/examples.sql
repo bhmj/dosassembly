@@ -1,5 +1,3 @@
-drop table if exists public.examples;
-
 CREATE TABLE if not exists public.examples (
     id serial8 not null primary key,
     txt_filename text not null,

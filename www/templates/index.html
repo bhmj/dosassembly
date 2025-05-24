@@ -15,6 +15,24 @@
   <script src="/js/ace/src-noconflict/theme-ambiance.js"></script>
   <script src="/js/ace/src-noconflict/theme-dawn.js"></script>
   <script src="https://v8.js-dos.com/latest/js-dos.js"></script>
+  <script>
+    var editor;
+    var editorTheme;
+
+    function toggleTheme(pageLoad) {
+      theme = localStorage.getItem("theme") || "light";
+      if (!pageLoad) {
+        theme = (theme=="dark" ? "light" : "dark");
+      }
+      editorTheme = theme == "dark" ? "ace/theme/ambiance" : "ace/theme/dawn"; // used on editor creation
+      if (editor) editor.setTheme(editorTheme);
+
+      document.documentElement.setAttribute("data-theme", theme);
+      localStorage.setItem("theme", theme);
+    };
+
+    toggleTheme(true);
+  </script>
 </head>
 <body>
   <header>
@@ -96,7 +114,6 @@
   <script src="/js/common.js"></script>
   <script src="/js/dosasm.js"></script>
   <script>
-    toggleTheme(true);
     // template vars
     var examples = formatExamples({{.Examples}});
     viewExamples();

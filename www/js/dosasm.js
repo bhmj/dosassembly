@@ -1,6 +1,3 @@
-var editor;
-var editorTheme;
-
 function initEditor() {
     let ed = document.getElementById("code-editor");
     ed.addEventListener("keydown", (e) => { e.stopPropagation(); });
@@ -213,19 +210,7 @@ async function loadExample(id) {
     editor.setValue(src, -1);
 }
 
-// Theme switcher -----------------------------------------------------------------------
-
-function toggleTheme(pageLoad) {
-    theme = localStorage.getItem("theme") || "light";
-    if (!pageLoad) {
-        theme = (theme=="dark" ? "light" : "dark");
-    }
-    editorTheme = theme == "dark" ? "ace/theme/ambiance" : "ace/theme/dawn"; // used on editor creation
-    if (editor) editor.setTheme(editorTheme);
-
-    document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("theme", theme);
-};
+// Source control -----------------------------------------------------------------------
 
 function setStatus(str) {
     document.getElementById("asm-status").innerText = str;

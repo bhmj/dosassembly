@@ -2,3 +2,4 @@
 .vscode
 /bin
 www/templates/gtag.js
+www/js/ace

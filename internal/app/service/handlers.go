@@ -117,7 +117,7 @@ func (s *Service) index(w http.ResponseWriter, token string) error {
 	if err != nil {
 		return err //nolint:wrapcheck
 	}
-	indexTemplate, err := template.ParseFiles(path.Join(tmplpath, "index.html"))
+	indexTemplate, err := template.ParseFiles(path.Join(tmplpath, "index.html"), path.Join(tmplpath, "gtag.js"))
 	if err != nil {
 		return err //nolint:wrapcheck
 	}

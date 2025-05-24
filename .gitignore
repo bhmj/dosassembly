@@ -1,4 +1,4 @@
 .env
 .vscode
-/examples
 /bin
+www/templates/gtag.js

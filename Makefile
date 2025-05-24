@@ -34,8 +34,6 @@ some of the <targets> are:
   docker-build     - build docker image
   develop-up       - run development environment: postgresql + nginx + Prometheus + Grafana in docker-compose
   develop-down     - stop development environment
-  dev-up           - run development environment without Grafana and Prometheus
-  dev-down         - stop dev-up
   prod-up          - run project in production mode in docker-compose, see docs/prod.md
   prod-down        - as is
 
@@ -49,8 +47,6 @@ See ./scripts/setup-ser.sh for details.
 
 What it will do:
     - install dependencies and tools (linter)
-    - create a local user for CMan (container manager)
-    - create local directories for temporary and cache files
 
 Press Enter to continue, Ctrl+C to quit
 endef
@@ -72,8 +68,9 @@ setup:
 	@echo "$$SETUP_HELP"
 	read
 	docker volume create dosassembly_dosasm_grafana
-	./scripts/setup-user.sh
-	./scripts/build-images.sh now
+	docker volume create dosassembly_dosasm_prometheus
+	go install github.com/golangci/golangci-lint@latest
+
 
 setup-ace:
 	./scripts/setup-ace.sh
@@ -142,14 +139,6 @@ develop-up: build copy_static
 
 develop-down:
 	docker compose -f docker-compose.dev.yaml down
-
-dev-up: export DOSASM_UPSTREAM=host.docker.internal
-dev-up: build copy_static
-	docker compose -f docker-compose.dev.short.yaml up -d
-	./scripts/install_nginx_config.sh docker-assets/dev/nginx/dosasm.conf dosasm
-
-dev-down:
-	docker compose -f docker-compose.dev.short.yaml down
 
 prod-up: export DOSASM_UPSTREAM=dosasm
 prod-up: docker-build copy_static

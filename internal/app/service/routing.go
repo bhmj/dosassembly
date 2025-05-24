@@ -86,7 +86,6 @@ func (s *Service) panicLoggerMiddleware(fn http.HandlerFunc) http.HandlerFunc {
 					logger = s.logger
 				}
 				logger.Error("PANIC", log.Error(err), log.Stack("stack"))
-				//p.replier.ReplyJSONCode(w, map[string]string{"error": err.Error()}, http.StatusInternalServerError)
 				// repanic to pass error to Sentry
 				panic(err)
 			}

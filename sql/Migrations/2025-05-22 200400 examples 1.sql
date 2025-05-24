@@ -1,5 +1,5 @@
 INSERT INTO public.examples (txt_filename, image_filename, size_category, asm_type, descr, link, rating) 
-VALUES 
+VALUES
 ('rift32b.asm', 'rift32b.jpg', '32b', 'NASM', '*rift* by *HellMood/DESiRE*, feb 2025, 2nd at Lovebyte 2025', 'https://www.pouet.net/prod.php?which=103620', 100),
 ('blake32.asm', 'blake32.png', '32b', 'NASM', '*blake 32* by *Marquee Design*, march 2021, 1st at Lovebyte 2021', 'https://www.pouet.net/prod.php?which=88205', 92),
 ('byte.asm', 'byte.png', '32b', 'NASM', '*byteropolis* by *Sensenstahl*, feb 2013', 'https://www.pouet.net/prod.php?which=61075', 91),

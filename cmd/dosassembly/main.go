@@ -11,7 +11,7 @@ import (
 	"github.com/bhmj/goblocks/log"
 )
 
-const appVersion string = "dev" // set at build time to "YYYY-MM-DD-HASH"
+const appVersion string = "dev" // set at build time to "YYYY-MM-DD-HASH", see Makefile
 
 func main() {
 	fmt.Printf("dosassembly project, version %s\n", appVersion)

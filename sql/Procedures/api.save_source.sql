@@ -12,7 +12,7 @@ declare
     _alphabet bytea;
 begin
     _alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYabcdefghijkmnopqrstuvwxyz3456789'::bytea;
-    _txt = _data->>'txt';
+    _txt = trim(_data->>'txt');
     _asm_type = _data->>'asm_type';
     
     if trim(coalesce(_txt, '')) = '' then

@@ -46,22 +46,7 @@ func (a *app) Run() {
 	a.launch(svc)
 }
 
-// launch/shutdown scheme
-// 1. process start
-//       |
-// 2. k8s health set alive=true, ready=false
-// 3. async start: prometheus server, http_api server
-// 4. set ready=true if all services from (3) are ready
-//
-// 1. shutdown signal
-//       |
-// 2. k8s health set ready=false
-// 3. stop accepting new connections and requests to http server
-// 4. finalize responses to running requests
-// 5. stop prometeus server
-// 6. set alive=false
-// 7. stop http server
-
+// launch starts the app and waits for shutdown signal
 func (a *app) launch(svc *service.Service) {
 	var wg sync.WaitGroup
 

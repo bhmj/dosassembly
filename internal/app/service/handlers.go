@@ -130,16 +130,10 @@ func (s *Service) index(w http.ResponseWriter, token string) error {
 	return nil
 }
 
-func (s *Service) HandleAbout(w http.ResponseWriter, r *http.Request) int {
-	return 200
-}
-
-type pgRunRequest struct {
-	ComboHandle   string            `json:"idc"`
-	SnippetHandle string            `json:"id"`
-	Lang          string            `json:"lang"`
-	Version       string            `json:"version"`
-	Files         map[string]string `json:"files"`
+type compileRequest struct {
+	Lang    string            `json:"lang"`
+	Version string            `json:"version"`
+	Files   map[string]string `json:"files"`
 	//
 	RAM     uint `json:"ram"`     // Mb
 	CPUs    uint `json:"cpus"`    // 1/1000 CPU
@@ -156,7 +150,7 @@ func (s *Service) HandleCompileCORS(w http.ResponseWriter, r *http.Request) (int
 }
 
 func (s *Service) HandleCompile(w http.ResponseWriter, r *http.Request) (int, error) {
-	var req pgRunRequest
+	var req compileRequest
 
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
@@ -208,7 +202,6 @@ func (s *Service) HandleCompile(w http.ResponseWriter, r *http.Request) (int, er
 
 	// parse response
 	file, output, err := parseResponse(buf)
-
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}
@@ -242,7 +235,7 @@ func readSSEStreams(r *http.Response, streams []string) (string, error) {
 		}
 
 		if strings.HasPrefix(line, "event: ") {
-			event := strings.TrimSpace(line[7:]) // we do not expect any spaces nor newlines, get rid of them.
+			event := strings.TrimSpace(line[7:]) // we do not expect any spaces nor newlines in event name, get rid of them.
 			reading = false
 			for _, stream := range streams {
 				if strings.HasPrefix(event, stream) {

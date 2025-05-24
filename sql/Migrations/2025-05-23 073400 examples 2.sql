@@ -1,5 +1,5 @@
 INSERT INTO public.examples (txt_filename, image_filename, size_category, asm_type, descr, link, rating) 
-VALUES 
+VALUES
 ('cantorus.asm', 'cantorus.png', '512b', 'FASM', '*cantorus* by *Titan*, nov 2007, 3nd at Main 2007', 'https://www.pouet.net/prod.php?which=33169', 73),
 ('infinito.asm', 'infinito.png', '512b', 'FASM', '*Infinito, a little bit of.*, apr 2006', 'https://www.pouet.net/prod.php?which=24447', 76),
 ('wamma_dunk.asm', 'wamma_drunk.png', '512b', 'NASM', '*I''m afraid I was very, very drunk* by *wamma*, sep 2013', 'https://www.pouet.net/prod.php?which=61910', 94),

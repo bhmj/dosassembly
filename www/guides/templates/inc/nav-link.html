@@ -1,0 +1,11 @@
+{# -*- engine: jinja2 -*- #}
+
+<li>
+  {%- if link -%}
+    <a href="{{ link }}"><div class="menu-item">{{ prompt }}</div></a>
+  {%- else -%}
+    <div class="menu-item inactive">{{ prompt }}</div>
+  {%- endif -%}
+</li>
+
+{# nav-link.html ends here #}

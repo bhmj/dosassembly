@@ -36,7 +36,7 @@ location /api/ {
     proxy_send_timeout 300; 
 }
 
-location ~ ^/(img|js|styles|examples)/ {
+location ~ ^/(img|js|styles|examples|guides)/ {
     root /var/www/static/${DOSASM_DOMAIN};
 }
 

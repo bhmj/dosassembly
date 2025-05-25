@@ -210,6 +210,40 @@ async function loadExample(id) {
     editor.setValue(src, -1);
 }
 
+// Guide control ------------------------------------------------------------------------
+
+function loadPage(path, file) {
+    let guideDiv = document.getElementById("guide");
+    let uri = "/guides/"+path+"/" + (file || (path + "-about.html"));
+    fetch(uri)
+        .then(response => {
+            if (!response.ok) throw new Error("Network response was not ok");
+            return response.text();
+        })
+        .then(html => {
+            html = html.replace(/<link[^>]+>/gi, `<link rel="stylesheet" type="text/css" href="/guides/${path}/${path}-style.css">`);
+            guideDiv.innerHTML = html;
+            bindLinks(path, guideDiv);
+        })
+        .catch(error => {
+            guideDiv.innerHTML = `<p>Error loading guide: ${file}</p>`;
+            console.error(error);
+        });
+}
+
+function bindLinks(path, guideDiv) {
+    const links = guideDiv.querySelectorAll('a[href]');
+    links.forEach(link => {
+        link.addEventListener('click', function(event) {
+            const href = this.getAttribute('href');
+            if (!href.startsWith('http')) {
+                event.preventDefault();
+                loadPage(path, href);
+            }
+        });
+    });
+}
+
 // Source control -----------------------------------------------------------------------
 
 function setStatus(str) {

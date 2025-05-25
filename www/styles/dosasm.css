@@ -257,12 +257,33 @@ select, button {
     overflow: auto;
 }
 
-.tab-content a {
+#tab-docs {
+    white-space: inherit;
+}
+
+#guides-list {
+    padding: 0.3em;
+    background-color: var(--header-bg);
+}
+
+#guides-list span {
+    padding: 0.2em 1em;
+    display: inline-block;
+    margin: 0;
+    background-color: var(--control-bg);
+    color: var(--control-text);
+    cursor: pointer;
+}
+#guides-list span:hover {
+    background-color: var(--control-bg-hover);
+}
+
+#tab-about a {
     cursor: pointer;
     color: var(--link);
 }
 
-.tab-content a:visited {
+#tab-about a:visited {
     color: var(--visited-link);
 }
 

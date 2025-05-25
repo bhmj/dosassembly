@@ -1,0 +1,374 @@
+body {
+    font-family: sans-serif;
+    background: dimgray;
+}
+
+footer {
+  clear: both;
+  font-size: 70%;
+  color: silver;
+  padding: 1ex;
+}
+
+.box {
+  border: solid 1px silver;
+  box-shadow: 4px 4px 7px 0px rgba( 0, 0, 0, 0.2 );
+  background: navy;
+  color: rgb(85 255 255);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+#ng-header nav a:hover, #ng-header nav a:hover *, article a:hover, article a:hover *, #ng-header .topic:hover {
+  background: rgb(0 170 170);
+  color: rgb(0 0 0);
+}
+
+#ng-header nav {
+  padding: 0;
+  font-size: 16px;
+}
+
+#ng-header nav ul {
+  padding-left: 1ex;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin: 0.3em;
+}
+
+#ng-header nav ul li {
+  display: inline-block;
+  color: dimgray;
+}
+
+#ng-header nav ul li .topic {
+  color: white;
+}
+
+#ng-header nav ul li:not(:last-child)::after {
+  content: " |";
+  color: silver;
+}
+
+#ng-header nav a {
+  color: white;
+}
+
+section nav.menu {
+  float: left;
+  padding-right: 1ex;
+  margin-right: 1ex;
+  margin-bottom: 1ex;
+}
+
+section nav.menu ul {
+  list-style: none;
+  padding-left: 1ex;
+}
+
+section nav.menu > ul > li {
+  color: white;
+}
+
+section nav.menu > ul > li > ul > li {
+  color: silver;
+}
+
+section nav.menu a {
+  display: block;
+}
+
+nav.seeAlso {
+  border-top: solid 1px silver;
+  white-space: normal;
+  margin-top: 1ex;
+}
+
+nav.seeAlso ul {
+  padding: 0;
+  padding-left: 0.5em;
+  margin: 0;
+  margin-top: 0.5em;
+}
+
+nav.seeAlso ul li:first-child {
+  color: white;
+}
+
+nav.seeAlso ul li {
+  display: inline-block;
+  margin-right: 1em;
+}
+
+section article {
+  overflow: auto;
+  font-family: 'Roboto Mono', monospace;
+  padding: 0.5em;
+  margin-bottom: 1ex;
+}
+
+section article pre {
+  font-family: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+section article h1 {
+  color: white;
+  margin-bottom: 0;
+}
+
+section article ul {
+  list-style: none;
+  padding-left: 1ex;
+  white-space: normal;
+}
+
+section article span.ngb {
+  color: rgb(255 255 85);
+}
+
+section article span.ngu {
+  color: rgb(255 85 255);
+}
+
+section article a {
+  width: 100%;
+  display: inline-block;
+}
+
+
+span.bg0 {
+    background: black;
+}
+
+span.fg0 {
+    color: black;
+}
+
+span.bg1 {
+    background: navy;
+}
+
+span.fg1 {
+    color: navy;
+}
+
+span.bg2 {
+    background: green;
+}
+
+span.fg2 {
+    color: green;
+}
+
+span.bg3 {
+    background: teal;
+}
+
+span.fg3 {
+    color: teal;
+}
+
+span.bg4 {
+    background: maroon;
+}
+
+span.fg4 {
+    color: maroon;
+}
+
+span.bg5 {
+    background: purple;
+}
+
+span.fg5 {
+    color: purple;
+}
+
+span.bg6 {
+    background: olive;
+}
+
+span.fg6 {
+    color: olive;
+}
+
+span.bg7 {
+    background: silver;
+}
+
+span.fg7 {
+    color: silver;
+}
+
+span.bg8 {
+    background: gray;
+}
+
+span.fg8 {
+    color: gray;
+}
+
+span.bg9 {
+    background: blue;
+}
+
+span.fg9 {
+    color: blue;
+}
+
+span.bg10 {
+    background: lime;
+}
+
+span.fg10 {
+    color: lime;
+}
+
+span.bg11 {
+    background: aqua;
+}
+
+span.fg11 {
+    color: aqua;
+}
+
+span.bg12 {
+    background: red;
+}
+
+span.fg12 {
+    color: red;
+}
+
+span.bg13 {
+    background: fuchsia;
+}
+
+span.fg13 {
+    color: fuchsia;
+}
+
+span.bg14 {
+    background: yellow;
+}
+
+span.fg14 {
+    color: yellow;
+}
+
+span.bg15 {
+    background: white;
+}
+
+span.fg15 {
+    color: white;
+}
+
+
+@media screen and (max-width: 480px) {
+
+  .box {
+    box-shadow: none;
+  }
+
+  section nav.menu {
+    float: none;
+    margin: 0;
+  }
+
+  section article {
+    clear: both;
+  }
+
+  #ng-header nav {
+    padding: 0;
+    margin: 0;
+    text-align: center;
+  }
+
+  #ng-header nav ul, #ng-header nav ul a, #ng-header nav ul span {
+    padding: 0;
+  }
+
+  #ng-header nav ul li {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    display: inline;
+  }
+
+  #ng-header nav ul li::after {
+    content: "";
+  }
+
+  #ng-header nav ul li:nth-child(2):after {
+    content: "\\A";
+    white-space: pre;
+  }
+
+  section nav.menu li {
+    display: inline-block;
+  }
+
+  section nav.menu a {
+    display: inline-block;
+    font-size: 80%;
+  }
+
+  section nav.menu ul ul li::after {
+    content: " |";
+    color: white;
+  }
+
+  section article {
+    font-size: 80%;
+  }
+}
+
+/* base.css ends here */
+
+.menu-item {
+  display: inline-block;
+  padding: 0.2em 1em;
+}
+
+.menu-dropper {
+  display: flex;
+  padding: 0;
+}
+
+.menu-dropper li {
+  position: relative;
+  list-style: none;
+}
+
+#ng-header .dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: white;
+  min-width: 200px;
+  display: none;
+  flex-direction: column;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  border: 1px solid white;
+}
+
+#ng-header .dropdown a {
+  padding: 0.3rem 1rem;
+  text-decoration: none;
+  background-color: navy;
+  color: rgb(255 255 85);
+}
+
+#ng-header .menu-dropper li:hover .dropdown {
+  display: flex;
+}
+
+.dropdown a:hover {
+  background: rgb(0 170 170);
+}

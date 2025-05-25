@@ -75,7 +75,11 @@
           <div class="tab" onclick="switchTab('about')">About</div>
         </div>
         <div class="tab-content" id="tab-output"><div id="dosbox-container" ></div><div id="compiler-output"></div></div>
-        <div class="tab-content" id="tab-docs" style="display: none;">Assembly language docs / CPU instructions manual / VGA register references / tutorials -- <b>coming soon!</b>
+        <div class="tab-content" id="tab-docs" style="display: none;"><div id="guides-list"><span onclick="loadPage('x86')">i80x86</span>
+            <span onclick="loadPage('progref')">The Programmer's Reference 0.02b</span>
+            <span onclick="loadPage('vgaregs')">VGA Registers</span>
+            </div>
+            <div id="guide"></div>
         </div>
         <div class="tab-content" id="tab-examples" style="display: none;"><div><select id="size-select" onchange="viewExamples()">
               <option value="*" selected>All sizes</option>

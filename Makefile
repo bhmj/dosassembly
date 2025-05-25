@@ -47,6 +47,8 @@ See ./scripts/setup-ser.sh for details.
 
 What it will do:
     - install dependencies and tools (linter)
+	- install pipx
+	- install ng2web
 
 Press Enter to continue, Ctrl+C to quit
 endef
@@ -70,7 +72,8 @@ setup:
 	docker volume create dosassembly_dosasm_grafana
 	docker volume create dosassembly_dosasm_prometheus
 	go install github.com/golangci/golangci-lint@latest
-
+	sudo apt install pipx
+	pipx install ng2web
 
 setup-ace:
 	./scripts/setup-ace.sh

@@ -124,7 +124,12 @@ define DOCKER_PARAMS
 endef
 export DOCKER_PARAMS
 
-copy_static:
+ng2web:
+	cd www/guides && ng2web -o x86 x86.ng
+	cd www/guides && ng2web -o progref progref.ng
+	cd www/guides && ng2web -o vgaregs vgaregs.ng
+
+copy_static: ng2web
 	if [ ! -d "/var/nginx-proxy" ]; then echo "/var/nginx-proxy/ does not exist"; exit 1; fi
 	mkdir -p /var/nginx-proxy/static/$(DOSASM_DOMAIN)
 	printf "copying $$(pwd)/www -> /var/nginx-proxy/static/$(DOSASM_DOMAIN)\n"

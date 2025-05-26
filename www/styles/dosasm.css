@@ -278,12 +278,12 @@ select, button {
     background-color: var(--control-bg-hover);
 }
 
-#tab-about a {
+#tab-about a, #tab-examples a {
     cursor: pointer;
     color: var(--link);
 }
 
-#tab-about a:visited {
+#tab-about a:visited, #tab-examples a:visited {
     color: var(--visited-link);
 }
 

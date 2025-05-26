@@ -1,5 +1,5 @@
 .box {
-  border: solid 1px silver;
+  border-bottom: solid 1px silver;
   box-shadow: 4px 4px 7px 0px rgba( 0, 0, 0, 0.2 );
   background: navy;
   color: rgb(85 255 255);
@@ -333,12 +333,11 @@ span.fg15 {
   position: absolute;
   top: 100%;
   left: 0;
-  background: white;
   min-width: 200px;
   display: none;
   flex-direction: column;
   box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-  border: 1px solid white;
+  border: 1px solid silver;
 }
 
 #ng-header .dropdown a {

@@ -128,6 +128,7 @@ ng2web:
 	cd www/guides && ng2web -o x86 x86.ng
 	cd www/guides && ng2web -o progref progref.ng
 	cd www/guides && ng2web -o vgaregs vgaregs.ng
+	cd www/guides && ng2web -o ints ints.ng
 
 copy_static: ng2web
 	if [ ! -d "/var/nginx-proxy" ]; then echo "/var/nginx-proxy/ does not exist"; exit 1; fi

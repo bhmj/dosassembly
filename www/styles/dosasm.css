@@ -303,7 +303,7 @@ footer {
     background-color: var(--status-bg);
     padding: 8px 20px;
     border-top: 1px solid var(--line-color);
-    font-size: 0.9em;
+    font-size: 1em;
     text-align: left;
 }
 

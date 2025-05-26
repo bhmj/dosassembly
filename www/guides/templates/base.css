@@ -1,15 +1,3 @@
-body {
-    font-family: sans-serif;
-    background: dimgray;
-}
-
-footer {
-  clear: both;
-  font-size: 70%;
-  color: silver;
-  padding: 1ex;
-}
-
 .box {
   border: solid 1px silver;
   box-shadow: 4px 4px 7px 0px rgba( 0, 0, 0, 0.2 );

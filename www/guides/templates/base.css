@@ -24,7 +24,7 @@ a {
   padding-left: 1ex;
   padding-top: 0;
   padding-bottom: 0;
-  margin: 0.3em;
+  margin: 0;
 }
 
 #ng-header nav ul li {
@@ -34,11 +34,6 @@ a {
 
 #ng-header nav ul li .topic {
   color: white;
-}
-
-#ng-header nav ul li:not(:last-child)::after {
-  content: " |";
-  color: silver;
 }
 
 #ng-header nav a {

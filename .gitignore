@@ -1,6 +1,8 @@
-.env
+__debug*
+.env*
 .vscode
 /bin
+/ng2web
 www/templates/gtag.js
 www/js/ace
 www/guides/x86

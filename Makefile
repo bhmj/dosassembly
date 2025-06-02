@@ -1,9 +1,9 @@
 SHELL := /bin/bash
 
-ifneq (,$(wildcard .env))
-    include .env
-    export $(shell sed 's/=.*//' .env)
-endif
+define load_env
+	@set -a && . $(1) && set +a && \
+	$(MAKE) --no-print-directory $(2)
+endef
 
 # application binary type for docker image
 export DOCKER_GOOS=linux
@@ -16,6 +16,7 @@ BINARY = $(BIN)/$(PROJECT)
 MAIN_SRC = ./cmd/$(PROJECT)
 
 define USAGE
+DOS Assembly project. Check it out at https://dosasm.com
 
 Usage: make <target>
 
@@ -32,10 +33,12 @@ some of the <targets> are:
 
   update-deps      - update Go dependencies
   docker-build     - build docker image
-  develop-up       - run development environment: postgresql + nginx + Prometheus + Grafana in docker-compose
-  develop-down     - stop development environment
-  prod-up          - run project in production mode in docker-compose, see docs/prod.md
-  prod-down        - as is
+  dev-up           - run development environment: DB + Prometheus + Grafana in docker, main app in IDE.
+  dev-down         - stop development environment
+  stage-up         - run staging environment: like prod, but locally with self-signed certs.
+  stage-down       - stop development environment
+  prod-up          - run production: all components in docker, see docs/prod.md.
+  prod-down        - stop production
 
 endef
 export USAGE
@@ -47,7 +50,6 @@ See ./scripts/setup-ser.sh for details.
 
 What it will do:
     - install dependencies and tools (linter)
-	- install pipx
 	- install ng2web
 
 Press Enter to continue, Ctrl+C to quit
@@ -72,8 +74,8 @@ setup:
 	docker volume create dosassembly_dosasm_grafana
 	docker volume create dosassembly_dosasm_prometheus
 	go install github.com/golangci/golangci-lint@latest
-	sudo apt install pipx
-	pipx install ng2web
+	git clone https://github.com/bhmj/ng2web.git
+	echo "You'll have to install ng2web manually in your system; i just don't rememeber how to do it )"
 
 setup-ace:
 	./scripts/setup-ace.sh
@@ -141,21 +143,45 @@ docker-build:
 	@echo docker build --tag dosassembly --target dosasm $(DOCKER_PARAMS) .
 	docker build --tag dosassembly --target dosasm $(DOCKER_PARAMS) .
 
-develop-up: export DOSASM_UPSTREAM=host.docker.internal
-develop-up: build copy_static
+dev-up:
+	$(call load_env,.env_dev,run-dev-up)
+
+run-dev-up: export DOSASM_UPSTREAM=host.docker.internal
+run-dev-up: build copy_static
 	docker compose -f docker-compose.dev.yaml up -d
-	./scripts/install_nginx_config.sh docker-assets/dev/nginx/dosasm.conf dosasm
+	sleep 0.8
+	docker exec nginx-proxy cat /app/scripts/install-nginx-config.sh | bash -s -- dosasm docker-assets/stage/nginx/dosasm.conf
 
-develop-down:
+dev-down:
 	docker compose -f docker-compose.dev.yaml down
+	docker exec nginx-proxy cat /app/scripts/remove-nginx-config.sh | bash -s -- dosasm docker-assets/stage/nginx/dosasm.conf
 
-prod-up: export DOSASM_UPSTREAM=dosasm
-prod-up: docker-build copy_static
+stage-up:
+	$(call load_env,.env_stage,run-stage-up)
+
+run-stage-up: export DOSASM_UPSTREAM=dosasm
+run-stage-up: docker-build copy_static
+	docker compose -f docker-compose.stage.yaml up -d
+	sleep 0.8
+	docker exec nginx-proxy cat /app/scripts/install-nginx-config.sh | bash -s -- dosasm docker-assets/stage/nginx/dosasm.conf
+
+stage-down:
+	docker compose -f docker-compose.stage.yaml down
+	docker exec nginx-proxy cat /app/scripts/remove-nginx-config.sh | bash -s -- dosasm docker-assets/stage/nginx/dosasm.conf
+
+prod-up:
+	$(call load_env,.env_prod,run-prod-up)
+
+run-prod-up: export DOSASM_UPSTREAM=dosasm
+run-prod-up: docker-build copy_static
 	docker compose -f docker-compose.prod.yaml up -d
+	sleep 1
+	docker exec nginx-proxy cat /app/scripts/install-nginx-config.sh | bash -s -- dosasm "docker-assets/prod/nginx/*.*"
 	./scripts/install_nginx_config.sh "docker-assets/prod/nginx/*.*" dosasm
 
 prod-down:
 	docker compose -f docker-compose.prod.yaml down
+	docker exec nginx-proxy cat /app/scripts/remove-nginx-config.sh | bash -s -- dosasm "docker-assets/prod/nginx/*.*"
 
 db:
 	docker volume create dosassembly_dosasm_db_data
@@ -167,6 +193,6 @@ db:
 cake:
 	printf "%b\n" "$$CAKE"
 
-.PHONY: all build run lint test docker-build docker develop-up develop-down prod-up prod-down cake update-deps
+.PHONY: help all build run lint test setup setup-ace docker-build docker dev-up dev-down stage-up stage-down prod-up prod-down cake update-deps db
 
 $(V).SILENT:

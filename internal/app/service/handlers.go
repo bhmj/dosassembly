@@ -168,10 +168,10 @@ func (s *Service) HandleCompile(w http.ResponseWriter, r *http.Request) (int, er
 
 	// update sandbox query with default values for DOS VM
 	req.RAM = 300
-	req.CPUs = 2000
-	req.CPUTime = 5000
+	req.CPUs = 12000
+	req.CPUTime = 15000
 	req.Net = 0
-	req.RunTime = 5
+	req.RunTime = 15
 
 	// do not pass raw input json, repack
 	sandboxReq, err := json.Marshal(&req)

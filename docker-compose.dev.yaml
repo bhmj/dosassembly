@@ -1,5 +1,3 @@
-version: '3.8'
-
 volumes:
   dosasm_db_data:
   dosasm_prometheus:
@@ -10,34 +8,13 @@ networks:
     name: dosasm_net
 
 services:
-  dosasm:
-    user: ${USER}
-    image: "dosassembly"
-    restart: always
-    command:
-      --config-file=/app/config/config.yaml
-    env_file:
-      - ".env"
-    volumes:
-      - ./www/templates:/app/www/templates
-      - ./config/dosasm:/app/config
-      - ./sql:/app/migrations
-    logging:
-      driver: "json-file"
-      options:
-        max-file: "3"
-        max-size: "50m"
-    depends_on:
-      - postgres
-    networks:
-      - dosasm_net
   postgres:
     image: "postgres:14-alpine"
     restart: always
     ports:
       - "5444:5432"
     env_file:
-      - ".env"
+      - ".env_dev"
     volumes:
       - ./docker-assets/postgresql/import:/tmp/import:ro
       - type: volume
@@ -66,6 +43,7 @@ services:
     networks:
       - dosasm_net
   grafana:
+    hostname: dosasm-grafana # there can be multiple grafanas and nginx must be able to distinguish them
     image: "grafana/grafana-oss"
     restart: always
     volumes:

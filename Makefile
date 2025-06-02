@@ -29,11 +29,11 @@ some of the <targets> are:
   build            - build binaries into $(BIN)/
   lint             - run linters
   test             - run tests
-  run              - run project locally ("make develop-up" must be run beforehand)
+  run              - run project locally ("make dev-up" must be run beforehand)
 
   update-deps      - update Go dependencies
   docker-build     - build docker image
-  dev-up           - run development environment: DB + Prometheus + Grafana in docker, main app in IDE.
+  dev-up           - run development environment: DB + Prometheus + Grafana in docker (main app in IDE).
   dev-down         - stop development environment
   stage-up         - run staging environment: like prod, but locally with self-signed certs.
   stage-down       - stop development environment

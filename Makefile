@@ -177,7 +177,6 @@ run-prod-up: docker-build copy_static
 	docker compose -f docker-compose.prod.yaml up -d
 	sleep 1
 	docker exec nginx-proxy cat /app/scripts/install-nginx-config.sh | bash -s -- dosasm "docker-assets/prod/nginx/*.*"
-	./scripts/install_nginx_config.sh "docker-assets/prod/nginx/*.*" dosasm
 
 prod-down:
 	docker compose -f docker-compose.prod.yaml down

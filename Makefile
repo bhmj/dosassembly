@@ -147,7 +147,8 @@ dev-up:
 	$(call load_env,.env_dev,run-dev-up)
 
 run-dev-up: export DOSASM_UPSTREAM=host.docker.internal
-run-dev-up: build copy_static
+run-dev-up: build # copy_static
+	envsubst < docker-assets/dev/prometheus/prometheus.yml.template > docker-assets/dev/prometheus/prometheus.yml
 	docker compose -f docker-compose.dev.yaml up -d
 	sleep 0.8
 	docker exec nginx-proxy cat /app/scripts/install-nginx-config.sh | bash -s -- dosasm docker-assets/stage/nginx/dosasm.conf
@@ -161,6 +162,7 @@ stage-up:
 
 run-stage-up: export DOSASM_UPSTREAM=dosasm
 run-stage-up: docker-build copy_static
+	envsubst < docker-assets/stage/prometheus/prometheus.yml.template > docker-assets/stage/prometheus/prometheus.yml
 	docker compose -f docker-compose.stage.yaml up -d
 	sleep 0.8
 	docker exec nginx-proxy cat /app/scripts/install-nginx-config.sh | bash -s -- dosasm docker-assets/stage/nginx/dosasm.conf
@@ -174,6 +176,7 @@ prod-up:
 
 run-prod-up: export DOSASM_UPSTREAM=dosasm
 run-prod-up: docker-build copy_static
+	envsubst < docker-assets/prod/prometheus/prometheus.yml.template > docker-assets/prod/prometheus/prometheus.yml
 	docker compose -f docker-compose.prod.yaml up -d
 	sleep 1
 	docker exec nginx-proxy cat /app/scripts/install-nginx-config.sh | bash -s -- dosasm "docker-assets/prod/nginx/*.*"

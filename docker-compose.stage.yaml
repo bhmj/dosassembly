@@ -52,7 +52,7 @@ services:
     image: "prom/prometheus"
     restart: always
     volumes:
-      - ./docker-assets/stage/prometheus:/etc/prometheus # main service only (fcache ignored in dev environment)
+      - ./docker-assets/stage/prometheus:/etc/prometheus
       - type: volume
         source: dosasm_prometheus
         target: /prometheus

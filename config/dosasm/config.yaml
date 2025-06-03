@@ -4,7 +4,7 @@ service:
     server:
       port: {{DOSASM_METRICS_PORT}}
     metrics:
-      namespace: dosassembly
+      namespace: dosasm
   http:
     api_base: api
     port: {{DOSASM_API_PORT}}

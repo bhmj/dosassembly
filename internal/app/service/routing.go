@@ -37,7 +37,7 @@ func (s *Service) GetHandlers() (handlers []HandlerDefinition) {
 		handler := HandlerDefinition{
 			Method: raw[i].Method,
 			Path:   raw[i].Path,
-			Func:   s.applyMiddlewares(raw[i].Func, "dosasm", raw[i].Method),
+			Func:   s.applyMiddlewares(raw[i].Func, "dosasm", raw[i].Path),
 		}
 		handlers = append(handlers, handler)
 	}

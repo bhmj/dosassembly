@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"regexp"
 	"time"
 
 	"github.com/bhmj/goblocks/log"
@@ -60,7 +61,20 @@ func (s *Service) applyMiddlewares(fn HandlerWithResult, backendName, handlerNam
 }
 
 func (s *Service) loggingMiddleware(fn http.HandlerFunc) http.HandlerFunc {
+	var remoteAddressMask = regexp.MustCompile(`(.*):\d+`)
+
 	return func(w http.ResponseWriter, r *http.Request) {
+		// get real remote address
+		remoteAddr := r.RemoteAddr
+		if x, found := r.Header["X-Real-IP"]; found { //nolint:go-staticcheck
+			remoteAddr = x[0]
+		} else if x, found := r.Header["X-Real-Ip"]; found {
+			remoteAddr = x[0]
+		} else if x, found := r.Header["X-Forwarded-For"]; found {
+			remoteAddr = x[0]
+		}
+		r.RemoteAddr = remoteAddressMask.ReplaceAllString(remoteAddr, "$1")
+
 		fields := []log.Field{
 			log.String("method", r.Method),
 			log.String("uri", r.RequestURI),

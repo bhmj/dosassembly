@@ -37,7 +37,7 @@ func (s *Service) HandleIndexWithToken(w http.ResponseWriter, r *http.Request) (
 
 func (s *Service) HandleSave(w http.ResponseWriter, r *http.Request) (int, error) {
 	buf, err := io.ReadAll(r.Body)
-	if err != nil {
+	if err != nil || len(buf) > 20000 { // ~20K source code is enough
 		return http.StatusBadRequest, err
 	}
 	return s.ReplyStoredProcedure(w, "api.save_source", string(buf))

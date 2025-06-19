@@ -127,10 +127,10 @@ endef
 export DOCKER_PARAMS
 
 ng2web:
-	cd www/guides && ng2web -o x86 x86.ng
-	cd www/guides && ng2web -o progref progref.ng
-	cd www/guides && ng2web -o vgaregs vgaregs.ng
-	cd www/guides && ng2web -o ints ints.ng
+	cd www/guides && ng2web -o x86 x86.ng > /dev/null
+	cd www/guides && ng2web -o progref progref.ng > /dev/null
+	cd www/guides && ng2web -o vgaregs vgaregs.ng > /dev/null
+	cd www/guides && ng2web -o ints ints.ng > /dev/null
 
 copy_static: ng2web
 	if [ ! -d "/var/nginx-proxy" ]; then echo "/var/nginx-proxy/ does not exist"; exit 1; fi

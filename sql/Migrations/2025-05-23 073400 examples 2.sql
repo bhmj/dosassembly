@@ -11,3 +11,5 @@ VALUES
 ('searchlight.asm', 'searchlight.png', '256b', 'NASM', '*searchlight* by *wamma*, jan 2007', 'https://www.pouet.net/prod.php?which=29397', 93),
 ('centurio.asm', 'centurio.png', '256b', 'FASM', '*centurio* by *Red Sector Inc.*, aug 2015, 1st at Chaos Constructions 2015', 'https://www.pouet.net/prod.php?which=66283', 94)
 on conflict (txt_filename, size_category) do nothing;
+
+DELETE FROM public.examples WHERE txt_filename = 'wamma_dunk.asm';

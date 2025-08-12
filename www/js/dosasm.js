@@ -66,6 +66,9 @@ async function runCom() {
     switchTab('output');
     sourceCode = editor.getValue();
     try {
+        document.getElementById("run-button").disabled = true;
+        document.getElementById("run-button").textContent = "Running";
+
         setStatus("sending query...");
         let langs = document.getElementById("asm-lang");
         let lang = langs.options[langs.selectedIndex].value.toLowerCase();
@@ -124,6 +127,8 @@ async function runCom() {
         document.getElementById("compiler-output").innerText = "Failed to compile: " + error.message;
         document.getElementById("compiler-output").style.display = "block";
     }
+    document.getElementById("run-button").disabled = false;
+    document.getElementById("run-button").textContent = "Run";
 }
 
 // Resizeable panes ---------------------------------------------------------------------

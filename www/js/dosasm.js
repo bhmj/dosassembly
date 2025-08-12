@@ -100,12 +100,12 @@ async function runCom() {
                 onEvent: (event, ci) => {
                     if (event === "emu-ready") {
                         setStatus("emulator ready");
-                    }
-                    if (event === "bnd-play") {
+                    } else if (event === "bnd-play") {
                         setStatus("bundle ready");
-                    }
-                    if (event === "ci-ready") {
+                    } else if (event === "ci-ready") {
                         setStatus("running program ("+size+" bytes)");
+                    } else {
+                        setStatus("ev: "+event);
                     }
                 },
                 autoStart: true,
@@ -253,6 +253,7 @@ function bindLinks(path, guideDiv) {
 
 function setStatus(str) {
     document.getElementById("asm-status").innerText = str;
+    console.log("Status: " + str);
 }
 
 async function saveSource() {

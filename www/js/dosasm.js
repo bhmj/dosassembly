@@ -67,7 +67,7 @@ async function runCom() {
     sourceCode = editor.getValue();
     try {
         document.getElementById("run-button").disabled = true;
-        document.getElementById("run-button").textContent = "Running";
+        document.getElementById("run-button").textContent = "Building...";
 
         setStatus("sending query...");
         let langs = document.getElementById("asm-lang");

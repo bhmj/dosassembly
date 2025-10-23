@@ -287,8 +287,8 @@ select, button {
     color: var(--visited-link);
 }
 
-.compiler-output {
-    padding: 1em;
+#compiler-output {
+    margin: 0 1em;
 }
 
 #tab-examples {

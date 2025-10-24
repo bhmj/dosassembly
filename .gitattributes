@@ -1,3 +1,3 @@
-vendor/*  linguist-vendored
-www/examples/*  linguist-vendored
-www/guides/*  linguist-vendored
+vendor/* linguist-vendored
+www/examples/* linguist-vendored
+www/guides/* linguist-vendored

@@ -1,7 +1,7 @@
 ## Issues
     + random '\r' in server output
 
-## Refactoring
+## Refactoring (2025 May)
     + move ace cursor to 0:0
     + fix dark theme
     + store theme name in local storage
@@ -29,3 +29,4 @@
       + inner navigation <- (home) ->
       + sources
 
+## Refactoring (2025 Nov)

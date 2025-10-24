@@ -1,13 +1,12 @@
-service:
-  name: dosassembly
-  prometheus:
-    server:
-      port: {{DOSASM_METRICS_PORT}}
+app:
+  http:
+    port: {{DOSASM_API_PORT}}
+    stats_port: {{DOSASM_METRICS_PORT}}
     metrics:
       namespace: dosasm
-  http:
-    api_base: api
-    port: {{DOSASM_API_PORT}}
+dosasm:
+  api_base: api
+  name: dosassembly
   dbase:
     type: postgres
     conn_string: host={{DB_HOST}} port={{DB_PORT}} dbname={{DB_NAME}} user={{DB_USER}} password={{DB_PASSWORD}} sslmode=disable

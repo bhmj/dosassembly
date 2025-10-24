@@ -1,40 +1,31 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	syslog "log"
-	"os"
 
-	"github.com/bhmj/dosassembly/internal/app/dosassembly"
-	"github.com/bhmj/goblocks/conftool"
+	"github.com/bhmj/dosassembly/internal/dosasm"
+	"github.com/bhmj/goblocks/app"
+	"github.com/bhmj/goblocks/appstatus"
 	"github.com/bhmj/goblocks/log"
+	"github.com/bhmj/goblocks/metrics"
 )
 
-const appVersion string = "dev" // set at build time to "YYYY-MM-DD-HASH", see Makefile
+var appVersion = "local"
+
+func DosasmFactory(config any, logger log.MetaLogger, metricsRegistry *metrics.Registry, statusReporter appstatus.ServiceStatusReporter) (app.Service, error) {
+	svc, err := dosasm.New(config.(*dosasm.Config), logger, metricsRegistry, statusReporter)
+	if err != nil {
+		return nil, fmt.Errorf("create dosassembly service: %w", err)
+	}
+	return svc, nil
+}
 
 func main() {
-	fmt.Printf("dosassembly project, version %s\n", appVersion)
-	// try to load config
-	conf := flag.String("config-file", "", "")
-	flag.Parse()
-	configFile := ""
-	if conf == nil || *conf == "" {
-		fmt.Println("--help for help")
-		os.Exit(0)
-	}
-	configFile = *conf
-	cfg := &dosassembly.Config{}
-	err := conftool.ReadFromFile(configFile, cfg)
+	app := app.New("dosassembly", appVersion)
+	err := app.RegisterService("dosasm", &dosasm.Config{}, DosasmFactory)
 	if err != nil {
-		syslog.Fatal(err.Error())
+		syslog.Fatalf("register service: %v", err)
 	}
-
-	logger, err := log.New(cfg.LogLevel, false)
-	if err != nil {
-		syslog.Fatal(err.Error())
-	}
-	defer func() { _ = logger.Sync() }()
-
-	dosassembly.New(cfg, logger).Run()
+	app.Run(nil)
 }

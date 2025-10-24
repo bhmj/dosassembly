@@ -12,5 +12,5 @@ Uses [github.com/bhmj/nginx-proxy](https://github.com/bhmj/nginx-proxy) for web 
 
   - [ ] User registration (OpenID)
   - [ ] Survey
-  - [ ] File storage with file browser  
-  - [ ] Live debugging (CPU regs, memory map, etc)  
+  - [ ] File storage with file browser
+  - [ ] Live debugging (CPU regs, memory map, etc)

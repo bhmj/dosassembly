@@ -10,6 +10,7 @@ Uses [github.com/bhmj/nginx-proxy](https://github.com/bhmj/nginx-proxy) for web 
 
 ### Ideas
 
+  - [ ] Context help (int 21h, int 10h etc)
   - [ ] User registration (OpenID)
   - [ ] Survey
   - [ ] File storage with file browser

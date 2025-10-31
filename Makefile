@@ -139,6 +139,19 @@ copy_static: ng2web
 	find /var/nginx-proxy/static/$(DOSASM_DOMAIN)/ -mindepth 1 -delete
 	cp -r $$(pwd)/www/. /var/nginx-proxy/static/$(DOSASM_DOMAIN)/
 
+pub_guides:
+	$(call load_env,.env_stage,publish)
+
+publish_guides:
+	cp -r $$(pwd)/www/guides/. /var/nginx-proxy/static/$(DOSASM_DOMAIN)/guides/
+
+pub:
+	$(call load_env,.env_stage,publish)
+publish:
+	cp -f $$(pwd)/www/js/*.js /var/nginx-proxy/static/$(DOSASM_DOMAIN)/js/
+	cp -f $$(pwd)/www/styles/*.css /var/nginx-proxy/static/$(DOSASM_DOMAIN)/styles/
+	cp -f $$(pwd)/www/templates/index.html /var/nginx-proxy/static/$(DOSASM_DOMAIN)/templates/
+
 docker-build:
 	@echo docker build --tag dosassembly --target dosasm $(DOCKER_PARAMS) .
 	docker build --tag dosassembly --target dosasm $(DOCKER_PARAMS) .

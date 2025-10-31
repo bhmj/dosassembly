@@ -13,7 +13,41 @@ function initEditor() {
     });
     editor.setValue(sourceCode, -1);
     editor.setKeyboardHandler("ace/keyboard/vscode");
+    editor.commands.addCommand({
+        name: "showContextHelp",
+        bindKey: { win: "Alt-F1", mac: "Alt-F1", linux: "Alt+F1" },
+        exec: contextHelp,
+        readOnly: true // optional, true means it works even in read-only mode
+    });
     editor.focus();
+}
+
+function contextHelp(editor) {
+    alert("context help is under construction");
+    return;
+    // 1. Get cursor position
+    const cursor = editor.getCursorPosition();
+
+    // 2. Get the current line number
+    const currentLine = cursor.row;
+
+    // 3. Get 15 lines of context (12 before, 3 after)
+    const startLine = Math.max(0, currentLine - 12);
+    const endLine = Math.min(editor.session.getLength() - 1, currentLine + 3);
+
+    let contextLines = [];
+    for (let i = startLine; i <= endLine; i++) {
+    contextLines.push(editor.session.getLine(i));
+    }
+
+    const contextText = contextLines.join("\n");
+
+    // 4. Get the word under the cursor
+    const wordRange = editor.session.getWordRange(cursor.row, cursor.column);
+    const word = editor.session.getTextRange(wordRange);
+
+    // 5. Invoke your help logic
+    showHelp(word, contextText);
 }
 
 function base64ToUint8Array(base64) {
@@ -183,7 +217,7 @@ function switchTab(tabId) {
     document.querySelectorAll('.tab-content').forEach(tc => tc.style.display = 'none');
 
     document.querySelector(`.tab[onclick*="${tabId}"]`).classList.add('active');
-    document.getElementById(`tab-${tabId}`).style.display = 'block';
+    document.getElementById(`tab-${tabId}`).style.display = 'flex';
 }
 
 // Examples -----------------------------------------------------------------------------

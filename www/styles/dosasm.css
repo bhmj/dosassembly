@@ -249,12 +249,14 @@ select, button {
 }
 
 .tab-content {
-    flex: 1;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
     border-top: none;
     background: var(--tab-content-bg);
     font-family: monospace;
     white-space: pre-wrap;
-    overflow: auto;
+    overflow: hidden;
 }
 
 #tab-docs {
@@ -262,6 +264,8 @@ select, button {
 }
 
 #guides-list {
+    flex: 0 0 auto;
+
     padding: 0.3em;
     background-color: var(--header-bg);
 }
@@ -278,9 +282,21 @@ select, button {
     background-color: var(--control-bg-hover);
 }
 
+#guide {
+   flex: 1 1 auto;
+   overflow: hidden;
+   display: flex; 
+   flex-direction: column;
+}
+
 #tab-about a, #tab-examples a {
     cursor: pointer;
     color: var(--link);
+}
+
+#guide section {
+    flex: 1 1 auto;
+    overflow: auto;
 }
 
 #tab-about a:visited, #tab-examples a:visited {

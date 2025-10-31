@@ -347,6 +347,7 @@ footer {
     flex-wrap: wrap;
     align-items: stretch;
     gap: 1em;
+    overflow: auto;
 }
 
 .example-container {

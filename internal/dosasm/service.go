@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"time"
 
 	"github.com/bhmj/goblocks/appstatus"
 	"github.com/bhmj/goblocks/dbase"
@@ -13,16 +12,11 @@ import (
 	"github.com/bhmj/goblocks/metrics"
 )
 
-const (
-	sentryShutdownTimeout = 1 * time.Second
-)
-
 type Service struct {
-	cfg             *Config
-	logger          log.MetaLogger
-	metricsRegistry *metrics.Registry
-	statusReporter  appstatus.ServiceStatusReporter
-	db              abstract.DB
+	cfg            *Config
+	logger         log.MetaLogger
+	statusReporter appstatus.ServiceStatusReporter
+	db             abstract.DB
 }
 
 // HandlerDefinition contains method definition to use by HTTP server
@@ -46,11 +40,10 @@ func New(
 	}
 
 	svc := &Service{
-		logger:          logger,
-		cfg:             cfg,
-		metricsRegistry: metricsRegistry,
-		statusReporter:  statusReporter,
-		db:              database,
+		logger:         logger,
+		cfg:            cfg,
+		statusReporter: statusReporter,
+		db:             database,
 	}
 
 	return svc, nil

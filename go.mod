@@ -2,10 +2,7 @@ module github.com/bhmj/dosassembly
 
 go 1.24.1
 
-require (
-	github.com/gorilla/mux v1.8.1
-	github.com/prometheus/client_golang v1.23.2
-)
+require github.com/gorilla/mux v1.8.1
 
 require (
 	github.com/georgysavva/scany v1.2.3 // indirect
@@ -13,6 +10,7 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/jackc/pgconn v1.14.3 // indirect
 	github.com/jackc/pgx/v4 v4.18.3 // indirect
+	github.com/prometheus/client_golang v1.23.2 // indirect
 	github.com/samber/lo v1.52.0 // indirect
 	github.com/samber/slog-common v0.19.0 // indirect
 	github.com/samber/slog-zap/v2 v2.6.2 // indirect
@@ -26,7 +24,7 @@ require (
 
 require (
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/bhmj/goblocks v0.3.3
+	github.com/bhmj/goblocks v0.4.1
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect

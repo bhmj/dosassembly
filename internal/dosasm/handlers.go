@@ -48,7 +48,7 @@ func (s *Service) HandleSave(w http.ResponseWriter, r *http.Request) (int, error
 func (s *Service) ExecuteProcedure(procName string, args ...interface{}) ([]byte, error) {
 	var result string
 	procArguments := []string{"", "$1", "$1, $2", "$1, $2, $3", "$1, $2, $3, $4", "$1, $2, $3, $4, $5", "$1, $2, $3, $4, $5, $6", "$1, $2, $3, $4, $5, $6, $7"}
-	if len(args) > 7 { // nolint:gomnd
+	if len(args) > 7 {
 		return nil, errors.New("too many arguments for a stored procedure")
 	}
 	_, err := s.db.QueryRow(&result, fmt.Sprintf("select %s(%s)", procName, procArguments[len(args)]), args...)
@@ -193,7 +193,7 @@ func (s *Service) HandleCompile(w http.ResponseWriter, r *http.Request) (int, er
 		s.logger.Error("client.Do", log.Error(err))
 		return http.StatusInternalServerError, err
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck
 
 	// read response
 	buf, err := readSSEStreams(resp, []string{"stdout", "stderr"})

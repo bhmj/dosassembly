@@ -5,8 +5,7 @@ import (
 )
 
 type Config struct {
-	APIBase            string       `yaml:"api_base" default:"api/" description:"Service name for metrics"`
-	Name               string       `yaml:"name" description:"Service name for metrics" default:"dosassembly"`
+	APIBase            string       `yaml:"api_base" default:"api/" description:"API base"`
 	DBase              dbase.Config `yaml:"dbase" description:"DB config"`
 	PlaygroundServer   string       `yaml:"playground_server" description:"Playground server host"`
 	PlaygroundAPIToken string       `yaml:"playground_api_token" description:"Playground API token"`

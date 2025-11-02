@@ -17,7 +17,7 @@ type Application interface {
 
 // HandlerDefinition contains method definition to use by HTTP server
 type HandlerDefinition struct {
-	Endpoint string // used as "method" label for the "{service_name}_request_latency" metric
+	Endpoint string // used as "method" label for the `servicename_request_latency{method="endpoint"}` metric
 	Method   string // GET, POST, etc.
 	Path     string // URL path (Gorilla URL vars allowed)
 	Func     httpserver.HandlerWithResult
@@ -29,10 +29,16 @@ type Service interface {
 	Run(ctx context.Context) error
 }
 
+// AppInfo contains general app information and settings
+type Options struct {
+	Logger          log.MetaLogger
+	MetricsRegistry *metrics.Registry
+	ServiceReporter appstatus.ServiceStatusReporter
+	ConfigPath      string
+}
+
 // ServiceFactory is a function that creates a service instance
 type ServiceFactory func(
 	cfg any,
-	logger log.MetaLogger,
-	metricsRegistry *metrics.Registry,
-	statusReporter appstatus.ServiceStatusReporter,
+	options Options,
 ) (Service, error)

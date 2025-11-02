@@ -6,15 +6,12 @@ import (
 
 	"github.com/bhmj/dosassembly/internal/dosasm"
 	"github.com/bhmj/goblocks/app"
-	"github.com/bhmj/goblocks/appstatus"
-	"github.com/bhmj/goblocks/log"
-	"github.com/bhmj/goblocks/metrics"
 )
 
 var appVersion = "local"
 
-func DosasmFactory(config any, logger log.MetaLogger, metricsRegistry *metrics.Registry, statusReporter appstatus.ServiceStatusReporter) (app.Service, error) {
-	svc, err := dosasm.New(config.(*dosasm.Config), logger, metricsRegistry, statusReporter)
+func DosasmFactory(config any, options app.Options) (app.Service, error) {
+	svc, err := dosasm.New(config.(*dosasm.Config), options.Logger, options.MetricsRegistry, options.ServiceReporter)
 	if err != nil {
 		return nil, fmt.Errorf("create dosassembly service: %w", err)
 	}

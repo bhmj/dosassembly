@@ -1,3 +1,4 @@
 vendor/** linguist-vendored
 www/examples/** linguist-vendored
 www/guides/** linguist-vendored
+www/styles/** linguist-vendored

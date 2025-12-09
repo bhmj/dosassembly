@@ -3,7 +3,6 @@ package dosasm
 import (
 	"context"
 	"errors"
-	"net/http"
 
 	"github.com/bhmj/goblocks/appstatus"
 	"github.com/bhmj/goblocks/dbase"
@@ -17,14 +16,6 @@ type Service struct {
 	logger         log.MetaLogger
 	statusReporter appstatus.ServiceStatusReporter
 	db             abstract.DB
-}
-
-// HandlerDefinition contains method definition to use by HTTP server
-type HandlerDefinition struct {
-	Code   string
-	Method string
-	Path   string
-	Func   http.HandlerFunc
 }
 
 // New returns dosasm service instance

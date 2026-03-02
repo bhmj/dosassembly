@@ -20,9 +20,15 @@ RUN GOOS=$GOOS GOARCH=$GOARCH CGO_ENABLED=0 go build -ldflags "$LDFLAGS" -trimpa
 ARG TARGET_DISTR_TYPE
 ARG TARGET_DISTR_VERSION
 FROM ${TARGET_DISTR_TYPE}:${TARGET_DISTR_VERSION} AS dosasm
-ARG USER
-RUN adduser -Ds /bin/sh ${USER}
+ARG APP_USER
+RUN adduser -Ds /bin/sh ${APP_USER}
 RUN apk update && apk add --no-cache bind-tools ca-certificates && update-ca-certificates
 WORKDIR /app
 COPY --from=builder /source/bin/dosasm .
 ENTRYPOINT ["./dosasm"]
+
+# k8s image: includes config, migrations and templates (config has {{VAR}} placeholders substituted from env at runtime)
+FROM dosasm AS dosasm-k8s
+COPY config/dosasm/ /app/config/
+COPY sql/ /app/migrations/
+COPY www/templates/ /app/www/templates/

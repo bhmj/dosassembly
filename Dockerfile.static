@@ -1,0 +1,11 @@
+# Static assets for k8s: js, styles, templates/index.html, guides, img, examples (guides built with ng2web before build).
+# Build from repo root: make release (runs ng2web then builds this image).
+FROM nginx:alpine
+COPY www/js/*.js /usr/share/nginx/html/js/
+COPY www/js/ace/ /usr/share/nginx/html/js/ace/
+COPY www/styles/*.css /usr/share/nginx/html/styles/
+COPY www/templates/index.html /usr/share/nginx/html/templates/
+COPY www/guides/ /usr/share/nginx/html/guides/
+COPY www/img/ /usr/share/nginx/html/img/
+COPY www/examples/ /usr/share/nginx/html/examples/
+EXPOSE 80

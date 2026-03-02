@@ -1,19 +1,45 @@
 SHELL := /bin/bash
 
+GO_VERSION=$(shell grep "^go " go.mod | awk '{print $$2}')
+
+# load envs from a file (1st arg) and runs a make target with those vars (2nd arg)
 define load_env
 	@set -a && . $(1) && set +a && \
 	$(MAKE) --no-print-directory $(2)
 endef
 
-# application binary type for docker image
-export DOCKER_GOOS=linux
-export DOCKER_GOARCH=amd64
+GIT_SHA=$(shell git rev-parse --short HEAD)
+NEW_APP_VERSION=$$(awk -F. '{printf "%d.%d\n",$$1,$$2+1}' version)
 
-LDFLAGS = -s -w -X main.appVersion=dev-$(shell git rev-parse --short HEAD)-$(shell date +%y-%m-%d)
+LDFLAGS = -s -w -X main.appVersion=dev-$(GIT_SHA)
 PROJECT = $(shell basename $(PWD))
 BIN = ./bin
-BINARY = $(BIN)/$(PROJECT)
-MAIN_SRC = ./cmd/$(PROJECT)
+
+REGISTRY := registry.combobox.cc
+REGISTRY_USER ?= combobox
+IMAGE_STATIC := dosassembly-static
+IMAGE_BACKEND := dosassembly-backend
+VERSION_FILE := version
+NEW_APP_VERSION := $(shell test -f $(VERSION_FILE) && awk -F. '{printf "%d.%d\n",$$1,$$2+1}' $(VERSION_FILE) || echo "0.1")
+
+APP_USER ?= dummy
+GOOS ?= linux
+GOARCH ?= amd64
+GOLANG_VERSION ?= $(GO_VERSION)
+GOLANG_IMAGE ?= alpine
+TARGET_DISTR_TYPE ?= alpine
+TARGET_DISTR_VERSION ?= latest
+
+DOCKER_BUILD_ARGS := \
+	--build-arg APP_USER=$(APP_USER) \
+	--build-arg GOOS=$(GOOS) \
+	--build-arg GOARCH=$(GOARCH) \
+	--build-arg GOLANG_VERSION=$(GOLANG_VERSION) \
+	--build-arg GOLANG_IMAGE=$(GOLANG_IMAGE) \
+	--build-arg TARGET_DISTR_TYPE=$(TARGET_DISTR_TYPE) \
+	--build-arg TARGET_DISTR_VERSION=$(TARGET_DISTR_VERSION) \
+	--build-arg LDFLAGS='$(LDFLAGS)' \
+	--platform $(GOOS)/$(GOARCH)
 
 define USAGE
 DOS Assembly project. Check it out at https://dosasm.com
@@ -32,7 +58,9 @@ some of the <targets> are:
   run              - run project locally ("make dev-up" must be run beforehand)
 
   update-deps      - update Go dependencies
+  docker-login     - login to registry.combobox.cc
   docker-build     - build docker image
+  release          - build and push Docker images for k8s (registry.combobox.cc)
   dev-up           - run development environment: DB + Prometheus + Grafana in docker (main app in IDE).
   dev-down         - stop development environment
   stage-up         - run staging environment: like prod, but locally with self-signed certs.
@@ -81,50 +109,23 @@ setup-ace:
 	./scripts/setup-ace.sh
 
 update-deps:
-	go get -u ./... && go mod tidy
+	go get -u ./... && go mod tidy && go mod vendor
 
 all: build lint test
 
 build:
 	mkdir -p $(BIN)
-	CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -trimpath -o $(BINARY) $(MAIN_SRC)
+	CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -trimpath -o $(BINARY) ./cmd/
 
 run:
-	CGO_ENABLED=0 go run -ldflags "$(LDFLAGS)" -trimpath $(MAIN_SRC) --config-file=config/config.yaml
+	mkdir -p $(BIN)
+	CGO_ENABLED=0 go run -ldflags "$(LDFLAGS)" -trimpath ./cmd/ --config-file=config/config.yaml
 
 lint:
 	golangci-lint run
 
 test:
 	go test ./...	
-
-# application binary type for docker image
-export DOCKER_GOOS=linux
-export DOCKER_GOARCH=amd64
-# Go version to use while building binaries for docker image
-export GOLANG_VERSION=1.24
-# golang OS tag for building binaries for docker image
-export GOLANG_IMAGE=alpine 
-# target OS: the image type to run in production. Usually alpine fits OK.
-export TARGET_DISTR_TYPE=alpine
-# target OS version (codename)
-export TARGET_DISTR_VERSION=latest
-# a user created inside the container
-# files created by those services on mounted volumes will be owned by this user
-export DOCKER_USER=$(USER)
-
-define DOCKER_PARAMS
---build-arg USER=$(DOCKER_USER) \
---build-arg GOOS=$(DOCKER_GOOS) \
---build-arg GOARCH=$(DOCKER_GOARCH) \
---build-arg GOLANG_VERSION=$(GOLANG_VERSION) \
---build-arg GOLANG_IMAGE=$(GOLANG_IMAGE) \
---build-arg TARGET_DISTR_TYPE=$(TARGET_DISTR_TYPE) \
---build-arg TARGET_DISTR_VERSION=$(TARGET_DISTR_VERSION) \
---build-arg LDFLAGS="$(LDFLAGS)" \
---file Dockerfile
-endef
-export DOCKER_PARAMS
 
 ng2web:
 	cd www/guides && ng2web -o x86 x86.ng > /dev/null
@@ -152,9 +153,23 @@ publish:
 	cp -f $$(pwd)/www/styles/*.css /var/nginx-proxy/static/$(DOSASM_DOMAIN)/styles/
 	cp -f $$(pwd)/www/templates/index.html /var/nginx-proxy/static/$(DOSASM_DOMAIN)/templates/
 
+docker-login:
+	@echo "Logging in to $(REGISTRY)"
+	docker login --username "$(REGISTRY_USER)" $(REGISTRY)
+
 docker-build:
-	@echo docker build --tag dosassembly --target dosasm $(DOCKER_PARAMS) .
-	docker build --tag dosassembly --target dosasm $(DOCKER_PARAMS) .
+	docker build --tag dosassembly --target dosasm $(DOCKER_BUILD_ARGS) .
+
+docker-build-k8s: ng2web
+	echo Go version: $(GO_VERSION)
+	docker build --tag $(REGISTRY)/$(IMAGE_BACKEND):$(NEW_APP_VERSION) $(DOCKER_BUILD_ARGS) --target dosasm-k8s -f Dockerfile.backend .
+	docker build --platform $(GOOS)/$(GOARCH) --tag $(REGISTRY)/$(IMAGE_STATIC):$(NEW_APP_VERSION) -f Dockerfile.static .
+
+release: docker-build-k8s
+	echo "Pushing images..."
+	docker push $(REGISTRY)/$(IMAGE_BACKEND):$(NEW_APP_VERSION)
+	docker push $(REGISTRY)/$(IMAGE_STATIC):$(NEW_APP_VERSION)
+	printf "\n\nApplication version released: %s\n" "$(NEW_APP_VERSION)" && echo "$(NEW_APP_VERSION)" > version
 
 dev-up:
 	$(call load_env,.env_dev,run-dev-up)
@@ -208,6 +223,6 @@ db:
 cake:
 	printf "%b\n" "$$CAKE"
 
-.PHONY: help all build run lint test setup setup-ace docker-build docker dev-up dev-down stage-up stage-down prod-up prod-down cake update-deps db
+.PHONY: help all build run lint test setup setup-ace docker-build docker-build-k8s docker-login release dev-up dev-down stage-up stage-down prod-up prod-down cake update-deps db
 
 $(V).SILENT:

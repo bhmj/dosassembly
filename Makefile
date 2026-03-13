@@ -115,7 +115,7 @@ all: build lint test
 
 build:
 	mkdir -p $(BIN)
-	CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -trimpath -o $(BINARY) ./cmd/
+	CGO_ENABLED=0 go build -ldflags "$(LDFLAGS)" -trimpath -o $(BIN)/dosasm ./cmd/
 
 run:
 	mkdir -p $(BIN)

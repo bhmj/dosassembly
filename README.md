@@ -6,8 +6,6 @@ Write and run MS DOS assembly programs instantly. Share with others.
 
 Uses [github.com/bhmj/goblocks](https://github.com/bhmj/goblocks) for basic packages.  
 
-Uses [github.com/bhmj/nginx-proxy](https://github.com/bhmj/nginx-proxy) for web server.
-
 ### Ideas
 
   - [ ] Context help (int 21h, int 10h etc)
